@@ -815,9 +815,12 @@ void HadronicInteraction::performInteraction(Candidate *candidate) const {
 			for (int i = 0; i < nPhoton; ++i) {
 				const double ePhoton = sampleParticleEnergy([this, eAvailable](double x) { return this->spectrumPhoton(x, eAvailable); }, eAvailable);
 				if (eAvailable >= ePhoton) {
-					outPartID.push_back(22);
-					outPartE.push_back(ePhoton);
 					eAvailable -= ePhoton;
+					// create photons if allowed
+					if (havePhotons) {
+						outPartID.push_back(22);
+						outPartE.push_back(ePhoton);
+					}
 				} else {
 					break;
 				}
@@ -834,13 +837,15 @@ void HadronicInteraction::performInteraction(Candidate *candidate) const {
 				const double ePiPlus = sampleParticleEnergy([this, eAvailable](double x) { return this->spectrumPion(x, eAvailable); }, eAvailable);
 				const double ePiMinus = sampleParticleEnergy([this, eAvailable](double x) { return this->spectrumPion(x, eAvailable); }, eAvailable);
 				if (eAvailable >= ePiPlus + ePiMinus) {
-					outPartID.push_back(211);
-					outPartE.push_back(ePiPlus);
 					eAvailable -= ePiPlus;
-
-					outPartID.push_back(-211);
-					outPartE.push_back(ePiMinus);
 					eAvailable -= ePiMinus;
+					// create pions if allowed
+					if (havePions) {
+						outPartID.push_back(211);
+						outPartE.push_back(ePiPlus);
+						outPartID.push_back(-211);
+						outPartE.push_back(ePiMinus);
+					}
 				} else {
 					break;
 				}

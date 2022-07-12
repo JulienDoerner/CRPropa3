@@ -36,6 +36,8 @@ protected:
 
 	int flag_Function=0; // 0: Kellner, 1: Kamae, 2: Dermer, 3: Kamae+Kellner, 4: Dermer+Kellner, 5: Dermer+Kamae+Kellner
 	double EnergySplit = 100*GeV;
+	bool havePhotons = true;
+	bool havePions = false;
 public:
 	HadronicInteraction(
 		ref_ptr<Density> density,
@@ -50,6 +52,12 @@ public:
 	}
 	void setEnergySplit(double Energy){
 		EnergySplit = Energy;
+	}
+	void setHavePhotons(bool photon) {
+		havePhotons = photon;
+	}
+	void setHavePions(bool pion) {
+		havePions = pion;
 	}
 
 	// general functions
