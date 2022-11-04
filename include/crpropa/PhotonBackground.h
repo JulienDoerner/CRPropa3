@@ -65,8 +65,11 @@ public:
 		isSpaceDependend = true;
 	}
 
-	ref_ptr<Grid1f> getSpaceGrid() const {
-		return spaceGrid;
+	double getSpaceScale(Vector3d &position) {
+		if (!isSpaceDependend) 
+			return 1.;
+		
+		return spaceGrid -> interpolate(position);
 	}
 
 protected:
