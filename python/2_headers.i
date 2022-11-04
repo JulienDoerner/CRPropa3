@@ -545,6 +545,7 @@ using namespace crpropa;   // for usage of namespace in header files, necessary
 %include "crpropa/module/DiffusionSDE.h"
 %include "crpropa/module/TextOutput.h"
 
+%include "crpropa/module/HadronicInteraction.h"
 %include "crpropa/module/HDF5Output.h"
 %include "crpropa/module/OutputShell.h"
 %include "crpropa/module/EMCascade.h"
