@@ -158,8 +158,10 @@ void EMTripletPairProduction::process(Candidate *candidate) const {
 		return;
 
 	// cosmological scaling of interaction distance (comoving)
+	Vector3d pos = candidate -> current.getPosition();
 	double scaling = pow_integer<2>(1 + z) * photonField->getRedshiftScaling(z);
 	double rate = scaling * interpolate(E, tabEnergy, tabRate);
+	rate *= photonField -> getSpaceScale(pos);
 
 	// run this loop at least once to limit the step size
 	double step = candidate->getCurrentStep();

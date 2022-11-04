@@ -104,8 +104,10 @@ void EMDoublePairProduction::process(Candidate *candidate) const {
 		return;
 
 	// interaction rate
+	Vector3d pos = candidate->current.getPosition();
 	double rate = interpolate(E, tabEnergy, tabRate);
 	rate *= pow_integer<2>(1 + z) * photonField->getRedshiftScaling(z);
+	rate *= photonField -> getSpaceScale(pos);
 
 	// check for interaction
 	Random &random = Random::instance();

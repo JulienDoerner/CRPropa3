@@ -230,8 +230,10 @@ void EMPairProduction::process(Candidate *candidate) const {
 		return;
 
 	// interaction rate
+	Vector3d pos = candidate->current.getPosition();
 	double rate = interpolate(E, tabEnergy, tabRate);
 	rate *= pow_integer<2>(1 + z) * photonField->getRedshiftScaling(z);
+	rate *= photonField -> getSpaceScale(pos);
 
 	// run this loop at least once to limit the step size 
 	double step = candidate->getCurrentStep();
@@ -257,5 +259,6 @@ void EMPairProduction::setInteractionTag(std::string tag) {
 std::string EMPairProduction::getInteractionTag() const {
 	return interactionTag;
 }
+
 
 } // namespace crpropa
