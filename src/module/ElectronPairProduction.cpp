@@ -105,6 +105,9 @@ void ElectronPairProduction::process(Candidate *c) const {
 	double lf = c->current.getLorentzFactor();
 	double z = c->getRedshift();
 	double losslen = lossLength(id, lf, z);  // energy loss length
+	Vector3d pos = c -> current.getPosition();
+	losslen /= photonField -> getSpaceScale(pos); // rescale for photon field intensity
+
 	if (losslen >= std::numeric_limits<double>::max())
 		return;
 

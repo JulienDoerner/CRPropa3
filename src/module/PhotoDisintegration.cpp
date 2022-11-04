@@ -173,6 +173,8 @@ void PhotoDisintegration::process(Candidate *candidate) const {
 
 		double rate = interpolateEquidistant(lg, lgmin, lgmax, pdRate[idx]);
 		rate *= pow_integer<2>(1 + z) * photonField->getRedshiftScaling(z); // cosmological scaling, rate per comoving distance
+		Vector3d pos = candidate -> current.getPosition();
+		rate *= photonField -> getSpaceScale(pos);
 
 		// check if interaction occurs in this step
 		// otherwise limit next step to a fraction of the mean free path

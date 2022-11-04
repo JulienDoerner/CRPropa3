@@ -190,6 +190,10 @@ void PhotoPionProduction::process(Candidate *candidate) const {
 			}
 		}
 
+		// rescale for space dependence 
+		Vector3d pos = candidate->current.getPosition();
+		totalRate *= photonField -> getSpaceScale(pos);
+
 		// check if interaction does not happen
 		if (step < randDistance) {
 			if (totalRate > 0.)

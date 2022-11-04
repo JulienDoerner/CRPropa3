@@ -100,6 +100,8 @@ void ElasticScattering::process(Candidate *candidate) const {
 		double rate = interpolateEquidistant(lg, lgmin, lgmax, tabRate);
 		rate *= Z * N / double(A);  // TRK scaling
 		rate *= pow_integer<2>(1 + z) * photonField->getRedshiftScaling(z);  // cosmological scaling
+		Vector3d pos = candidate -> current.getPosition();
+		rate *= photonField -> getSpaceScale(pos); // rescale for field intensity
 
 		// check for interaction
 		Random &random = Random::instance();
@@ -117,7 +119,7 @@ void ElasticScattering::process(Candidate *candidate) const {
 		double cosTheta = 2 * random.rand() - 1;
 		double E = eps * candidate->current.getLorentzFactor() * (1. - cosTheta);
 
-		Vector3d pos = random.randomInterpolatedPosition(candidate->previous.getPosition(), candidate->current.getPosition());
+		pos = random.randomInterpolatedPosition(candidate->previous.getPosition(), pos);
 		candidate->addSecondary(22, E, pos, 1., interactionTag);
 
 		// repeat with remaining step
