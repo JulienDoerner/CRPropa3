@@ -3,6 +3,7 @@
 
 #include "crpropa/Common.h"
 #include "crpropa/Referenced.h"
+#include "crpropa/Grid.h"
 
 #include <vector>
 #include <string>
@@ -22,6 +23,7 @@ public:
 	PhotonField() {
 		this->fieldName = "AbstractPhotonField";
 		this->isRedshiftDependent = false;
+		this->isSpaceDependend = false;
 	}
 
 	/**
@@ -54,9 +56,24 @@ public:
 		this->fieldName = fieldName;
 	}
 
+	bool hasSpaceDependence() const {
+		return this -> isSpaceDependend;
+	}
+
+	void setSpaceGrid(ref_ptr<Grid1f> grid) {
+		spaceGrid = grid;
+		isSpaceDependend = true;
+	}
+
+	ref_ptr<Grid1f> getSpaceGrid() const {
+		return spaceGrid;
+	}
+
 protected:
 	std::string fieldName;
 	bool isRedshiftDependent;
+	bool isSpaceDependend;
+	ref_ptr<Grid1f> spaceGrid = NULL;
 };
 
 /**

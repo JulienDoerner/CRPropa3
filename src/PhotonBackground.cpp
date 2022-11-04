@@ -161,6 +161,7 @@ BlackbodyPhotonField::BlackbodyPhotonField(std::string fieldName, double blackbo
 	this->fieldName = fieldName;
 	this->blackbodyTemperature = blackbodyTemperature;
 	this->quantile = 0.0001; // tested to be sufficient, only used for extreme values of primary energy or temperature
+	this->isSpaceDependend = false;
 }
 
 double BlackbodyPhotonField::getPhotonDensity(double Ephoton, double z) const {
