@@ -27,8 +27,8 @@ TEST(testFunctionalGroups, gyroradius) {
 	double max_y = 0;
 
 	sim->add(propa);
-	sim->add(new MaximumTrajectoryLength(10*Mpc));
 	sim->add(collector);
+	sim->add(new MaximumTrajectoryLength(10*Mpc));
 
 	sim->run(c);
 

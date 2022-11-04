@@ -56,8 +56,11 @@ ref_ptr<Module> ModuleList::operator[](const std::size_t i) {
 
 void ModuleList::process(Candidate* candidate) const {
 	module_list_t::const_iterator m;
-	for (m = modules.begin(); m != modules.end(); m++)
+	for (m = modules.begin(); m != modules.end(); m++) {
 		(*m)->process(candidate);
+		if (!candidate->isActive())
+			return;
+	}
 }
 
 void ModuleList::process(ref_ptr<Candidate> candidate) const {
