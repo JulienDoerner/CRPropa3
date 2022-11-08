@@ -78,6 +78,9 @@ public:
 	bool reflective;	// using reflective repetition of the grid instead of periodic
 	interpolationType ipol;	// Interpolation type used between grid points
 
+	// empty constructor for SWIG
+	GridProperties(): origin(Vector3d(0.)), Nx(1), Ny(1), Nz(1), spacing(Vector3d(0.)), reflective(false), ipol(TRILINEAR) { }
+	
 	/** Constructor for cubic grid
 	 @param	origin	Position of the lower left front corner of the volume
 	 @param	N		Number of grid points in one direction
@@ -144,6 +147,14 @@ class Grid: public Referenced {
 	interpolationType ipolType; /**< Type of interpolation between the grid points */
 
 public:
+	/** empty constructor for initilizing
+	 */
+	Grid() {
+		setOrigin(Vector3d(0.));
+		setGridSize(1, 1, 1);
+		setSpacing(Vector3d(1.));
+		setReflective(false);
+	}
 	/** Constructor for cubic grid
 	 @param	origin	Position of the lower left front corner of the volume
 	 @param	N		Number of grid points in one direction
@@ -549,6 +560,7 @@ class ScalarGrid: public Grid1f {
 		KISS_LOG_WARNING << "ScalarGrid is deprecated and will be removed in the future. Replace with Grid1f (float) or Grid1d (double).";
 	}
 public:
+	ScalarGrid() : Grid1f() { };
 	ScalarGrid(Vector3d origin, size_t N, double spacing) : Grid1f(origin, N, spacing) {
 		printDeprecation();
 	}

@@ -18,7 +18,7 @@ namespace crpropa {
         CMZDensity();
         double getDensity(const Vector3d &position) const;
         double getH2Density(const Vector3d &position) const;
- 
+        double getNucleonDensity(const Vector3d &position) const;
         
     };
     

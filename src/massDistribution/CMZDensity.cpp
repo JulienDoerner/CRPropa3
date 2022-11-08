@@ -2,15 +2,17 @@
 
 namespace crpropa {
     
-    CMZDensity::CMZDensity(){
-		}
-    double CMZDensity::getDensity(const Vector3d &position) const {
-        
-        return getH2Density(position);
-    }
-    
-    double CMZDensity::getH2Density(const Vector3d &position) const {
-        
+CMZDensity::CMZDensity() { }
+
+double CMZDensity::getDensity(const Vector3d &position) const {
+    return getH2Density(position);
+}
+
+double CMZDensity::getNucleonDensity(const Vector3d &position) const {
+    return 2 * getH2Density(position);
+}
+
+double CMZDensity::getH2Density(const Vector3d &position) const {
         //VALUES FOR n PER M^3
         double n=0;
         double pi=3.1415926535;

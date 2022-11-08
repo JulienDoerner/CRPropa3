@@ -4,6 +4,7 @@
 #include "crpropa/Common.h"
 #include "crpropa/Referenced.h"
 #include "crpropa/Grid.h"
+#include "crpropa/Vector3.h"
 
 #include <vector>
 #include <string>
@@ -60,24 +61,37 @@ public:
 		return this -> isSpaceDependend;
 	}
 
-	void setSpaceGrid(ref_ptr<Grid1f> grid) {
-		spaceGrid = grid;
-		isSpaceDependend = true;
-	}
-
 	double getSpaceScale(Vector3d &position) {
-		if (!isSpaceDependend) 
-			return 1.;
-		
-		return spaceGrid -> interpolate(position);
+		return 1.; // to overwrite in space dependend modules
 	}
 
 protected:
 	std::string fieldName;
 	bool isRedshiftDependent;
 	bool isSpaceDependend;
-	ref_ptr<Grid1f> spaceGrid = NULL;
 };
+
+
+// class SpaceDependendPhotonField: public PhotonField {
+// private:
+// 	ref_ptr<Grid1f> grid;
+// 	std::vector<double> photonEnergies;
+// 	std::vector<double> photonDensity;
+
+// public:
+// 	SpaceDependendPhotonField(std::string fieldName);
+	
+// 	double getPhotonDensity(double ePhoton) const;
+// 	double getSpaceScale(Vector3d &position) const;
+// 	double getRedshiftScaling(double z) const {return 1.;}
+// 	double getMinimumPhotonEnergy(double z) const;
+// 	double getMaximumPhotonEnergy(double z) const;
+
+// 	void readPhotonEnergy(std::string filePath);
+// 	void readPhotonDensity(std::string filePath);
+	
+// 	void setSpaceGrid(ref_ptr<Grid1f> grid);
+// };
 
 /**
  @class TabularPhotonField
@@ -96,8 +110,10 @@ public:
 	double getRedshiftScaling(double z) const;
 	double getMinimumPhotonEnergy(double z) const;
 	double getMaximumPhotonEnergy(double z) const;
+	
 
 protected:
+	void initAll();
 	void readPhotonEnergy(std::string filePath);
 	void readPhotonDensity(std::string filePath);
 	void readRedshift(std::string filePath);
@@ -109,6 +125,37 @@ protected:
 	std::vector<double> redshifts;
 	std::vector<double> redshiftScalings;
 };
+
+
+
+class SpaceDependendPhotonField: public PhotonField {
+public:
+	SpaceDependendPhotonField(const std::string fieldName, const bool isRedshiftDependent = true);
+	
+	double getPhotonDensity(double ePhoton, double z = 0.) const;
+	double getRedshiftScaling(double z) const;
+	double getMinimumPhotonEnergy(double z) const;
+	double getMaximumPhotonEnergy(double z) const;
+	
+	double getSpaceScale(Vector3d &position);
+	void setGrid(Grid1f grid);
+	void readGrid(std::string filePath, Vector3d &orig, size_t N, double spacing);
+protected:
+	void initAll();
+	void readPhotonEnergy(std::string filePath);
+	void readPhotonDensity(std::string filePath);
+	void readRedshift(std::string filePath);
+	void initRedshiftScaling();
+	void checkInputData() const;
+
+	std::vector<double> photonEnergies;
+	std::vector<double> photonDensity;
+	std::vector<double> redshifts;
+	std::vector<double> redshiftScalings;
+
+	Grid1f grid;
+};
+
 
 /**
  @class IRB_Kneiske04
