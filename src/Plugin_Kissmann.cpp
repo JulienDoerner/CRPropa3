@@ -134,26 +134,3 @@ double SourceSpiralArm::getZMax() {
 
 // -----------------------------------------------------------------------------------------------------------------------
 
-void CheckNaNModule::process(Candidate *cand) const {
-    bool isFinit = true;
-    
-    // check position information
-    isFinit = isFinit & std::isfinite(cand -> current.getPosition().getR2());
-
-    // check direction information
-    isFinit = isFinit & std::isfinite(cand -> current.getDirection().getR2());
-
-    // check energy
-    isFinit = isFinit & std::isfinite(cand -> current.getEnergy());
-
-    // check Trajectory Lenght
-    isFinit = isFinit & std::isfinite(cand -> getTrajectoryLength());
-
-    // check Time
-    isFinit = isFinit & std::isfinite(cand -> getTime());
-    
-    if(!isFinit) {
-        KISS_LOG_WARNING << "deactivated candidate not finite vaule. \n " << cand -> getDescription() << "\n";
-        cand -> setActive(false);
-    }
-}

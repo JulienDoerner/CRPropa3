@@ -87,6 +87,8 @@ double HadronicInteraction::KamaeSpectrumPhoton(double Esec, double Tp) const {
 }
 
 double HadronicInteraction::KamaeGammaND(double Esec, double Tp) const {
+    if (Esec >= Tp) 
+        return 0.; // nothing left
 	Esec/GeV; // all in units of GeV
 	Tp/GeV;
 	double x, y, z;
@@ -120,11 +122,10 @@ double HadronicInteraction::KamaeGammaND(double Esec, double Tp) const {
         a[7] = -35.105 + y*(36.167 + y*(-9.3575 + 0.33717*y));
         a[8] = 0.17554 + y*(0.37300 + y*(-0.014938 + y*(0.0032314 + 0.0025579*y)));
     	}
-      else
-      {
-        for (i = 0; i < 9; i++)
-      			a[i] = 1.e-10;
-    	}
+	else {
+		for (i = 0; i < 9; i++)
+			a[i] = 1.e-10;
+	}
     /* calculate the flux due to non-diffractive process for given gamma-ray energy */
     xa3 = x - a[3] + a[2]*pow(x-a[3],2);
     xa8 = x - a[8] + a[6]*pow(x - a[8],2)  +  a[7] * pow(x-a[8],3.);
@@ -132,18 +133,18 @@ double HadronicInteraction::KamaeGammaND(double Esec, double Tp) const {
     /* cutoff is the kinematic limit function as in the paper */
     cutoff = (1/(1 + exp(Wl*(Lmin - x))))*(1/(1 + exp(Wh*(x - Lmax))));
     sigma *= cutoff;
-    		if (sigma < 0)
-         sigma = 0;
+	if (sigma < 0)
+		sigma = 0;
 
-            if (Tp <= 1.95)             /* renormalization  */
-            {
-                pow1 = (y + 3.25)/(1 + 8.08*(y + 3.25));
-                r_factor = 3.05*exp(-107.0*pow1*pow1);
-            }
-            else
-            {
-                r_factor = 1.01;
-            }
+	if (Tp <= 1.95)             /* renormalization  */
+	{
+		pow1 = (y + 3.25)/(1 + 8.08*(y + 3.25));
+		r_factor = 3.05*exp(-107.0*pow1*pow1);
+	}
+	else
+	{
+		r_factor = 1.01;
+	}
     sigma *= r_factor;
     return sigma;
 }
@@ -253,6 +254,10 @@ double HadronicInteraction::KamaeGamma1232(double Esec, double Tp) const {
 
     if (sigma < 0)
         sigma = 0;
+
+	for(int i = 0; i < 5; i++){
+		std::cout << "c" << i << "\t" << c[i] << "\n";
+	}
 
     return sigma;
 }

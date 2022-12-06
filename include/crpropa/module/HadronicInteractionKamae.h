@@ -4,6 +4,9 @@
 #include <crpropa/Module.h>
 #include <crpropa/Units.h>
 #include <crpropa/massDistribution/Massdistribution.h>
+#include <fstream>
+#include <string>
+
 
 using namespace crpropa;
 
@@ -15,11 +18,20 @@ private:
 	double eq9(double x, std::vector<double> b) const;
 	double eq12(double x, std::vector<double> c) const;
     double limit;
+
+    std::ofstream *writeOut; 
+    std::ofstream *write2;
+
 	
 public:
     HadronicInteractionKamae(ref_ptr<Density> density, double limit = 0.01);
 	void process(Candidate* cand) const;
     void performInteraction(Candidate* cand) const;
+
+    void closeDebug() {
+        writeOut->close();
+        write2 -> close();
+    }
 
     double crossection(double Tp) const;
     

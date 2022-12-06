@@ -5,7 +5,14 @@
 
 using namespace crpropa;
 
-HadronicInteractionKamae::HadronicInteractionKamae(ref_ptr<Density> dens, double limit) : massDensity(dens), limit(limit) { }
+HadronicInteractionKamae::HadronicInteractionKamae(ref_ptr<Density> dens, double limit) : massDensity(dens), limit(limit) { 
+    writeOut = new std::ofstream("Kamae_Module_writeout.txt");
+    *writeOut << "process" << "\t" << "Ep [TeV]" << "\t" << "Esec [TeV]" << "\t" << "ND" << "\t" <<  "Diff" << "\t" << "1232" << "\t" << "1600" << "\n";
+
+    write2 = new std::ofstream("Kamae_eq9.txt");
+    *write2 << "x" << "\t" << "arg1" << "\t" << "arg2" << "\t"<<"x_br" << "\n";
+
+}   
 
 
 // ---------------------- Fit functions --------------------------------------------------------------
@@ -14,14 +21,14 @@ double HadronicInteractionKamae::eq6(double x, std::vector<double> a) const {
     double f1 = a[0] * std::exp(- a[1] * pow_integer<2>(x - a[3] + a[2] * pow_integer<2>(x - a[3])));
     double pow2 = - a[5] * pow_integer<2>(x - a[8] + a[6] * pow_integer<2>(x - a[8]) + a[7] * pow_integer<3>(x - a[8]));
     double f2 = a[4] * std::exp(pow2);
-    std::cout << f1 << " \t" << f2 << "(" << pow2 << ")\n";
+    // writeOut << f1 << " \t" << f2 << "(" << pow2 << ")\n";
     return std::max(f1 + f2, 0.);
 }
 
 double HadronicInteractionKamae::eq9(double x, std::vector<double> b) const {
     double arg1 = - b[1] * pow_integer<2>((x - b[2]) / (1 + b[3] * (x - b[2])));
     double arg2 = - b[5] * pow_integer<2>((x - b[6]) / (1 + b[7] * (x - b[6])));
-    std::cout << b[0] * std::exp(arg1) <<" " << b[4] * std::exp(arg2) << "\n";
+    *write2<< x <<"\t" << b[0] * std::exp(arg1) <<"\t" << b[4] * std::exp(arg2) << "\t" << b[6] - 1. / b[7] << "\n";
     return std::max(b[0] * std::exp(arg1) + b[4] * std::exp(arg2), 0.);
 }
 
@@ -154,7 +161,137 @@ void HadronicInteractionKamae::performInteraction(Candidate* cand) const {
     double epsMin = 1e-6 * Tp;
     double epsMax = Tp;
     double nPhoton = gaussInt([this, Tp](double x) {return this->SpectrumPhoton(x, Tp); }, epsMin, epsMax);
+    double nEminus = gaussInt([this, Tp](double x) {return this -> SpectrumElectron(x, Tp);}, epsMin, epsMax);
+    double nEplus = gaussInt([this, Tp](double x) {return this -> SpectrumPositron(x, Tp);}, epsMin, epsMax);
+    double nNuE = gaussInt([this, Tp](double x) {return this -> SpectrumElectronNeutrino(x, Tp);}, epsMin, epsMax);
+    double nAntiNuE = gaussInt([this, Tp](double x) {return this -> SpectrumAntiElectronNeutrino(x, Tp);}, epsMin, epsMax);
+    double nNuMu = gaussInt([this, Tp](double x) {return this -> SpectrumMuonNeutrino(x, Tp);}, epsMin, epsMax);
+    double nAntiNuMu = gaussInt([this, Tp](double x) {return this -> SpectrumAntiMuonNeutrino(x, Tp);}, epsMin, epsMax);
 
+    double nTotal = nPhoton + nEminus + nEplus + nNuE + nAntiNuE + nNuMu + nAntiNuMu;
+
+    // sample secondaries while energy left
+    double Eleft = Tp;
+
+    // find maximum propability
+    int nStep = 1000;
+    double pMaxPhoton, pMaxEminus, pMaxEplus, pMaxNuE, pMaxAnitNuE, pMaxNuMu, pMaxAntiNuMu, x;
+    for(int i = 0; i < nStep; i++){
+        x = epsMin + i * (epsMax - epsMin) / nStep;
+        double pPhoton = SpectrumPhoton(x, Tp);
+        if(pPhoton > pMaxPhoton)
+            pMaxPhoton = pPhoton;
+        
+        double pEminus = SpectrumElectron(x, Tp);
+        if(pEminus > pMaxEminus)
+            pMaxEminus = pEminus;
+        
+        double pEplus = SpectrumPositron(x, Tp);
+        if(pEplus > pMaxEminus)
+            pMaxEplus = pEplus;
+        
+        double pNuE = SpectrumElectronNeutrino(x, Tp);
+        if(pNuE > pMaxNuE) 
+            pMaxNuE = pNuE;
+        
+        double pAntiNuE = SpectrumAntiElectronNeutrino(x, Tp);
+        if(pAntiNuE > pMaxAnitNuE)
+            pMaxAnitNuE = pAntiNuE;
+        
+        double pNuMu = SpectrumMuonNeutrino(x, Tp);
+        if(pNuMu > pMaxNuMu)
+            pMaxNuMu = pNuMu;
+        
+        double pAntiNuMu = SpectrumAntiMuonNeutrino(x, Tp);
+        if(pAntiNuMu > pMaxAntiNuMu)
+            pMaxAntiNuMu = pAntiNuMu;
+    }
+
+    while(true) {
+        // choose random which particle to sample
+        double nPart = rand.rand() * nTotal;
+        double Esample = 0.;
+        int Id = 0;
+        double pMax = 0.;
+        std::function<const double(double)> sampleFrom;
+        if(nPart < nPhoton){
+            // sample Photon   
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumPhoton(x, Tp);};
+            Id = 22;
+            pMax = pMaxPhoton;
+        }
+        nPart -= nPhoton;
+        if(nPart < nEminus) {
+            // sample electron
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumElectron(x, Tp);};
+            Id = 11;
+            pMax = pMaxEminus;
+        }
+        nPart -= nEminus;
+        if(nPart < nEplus) {
+            // sample positron;
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumPositron(x, Tp);};
+            Id = -11;
+            pMax = pMaxEplus;
+        }
+        nPart -= nEplus;
+        if(nPart < nNuE) {
+            // sample electron neutrino
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumElectronNeutrino(x, Tp);};
+            Id = 12;
+            pMax = pMaxNuE;
+        }
+        nPart -= nNuE;
+        if(nPart < nAntiNuE) {
+            // sample anti electron neutrino
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumAntiElectronNeutrino(x, Tp);};
+            Id = -12;
+            pMax = pMaxAnitNuE;
+        }
+        nPart -= nAntiNuE;
+        if(nPart < nNuMu) {
+            // sample muon neutrino
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumMuonNeutrino(x, Tp);};
+            Id = 14;
+            pMax = pMaxNuMu;
+        }
+        nPart -= nNuMu;
+        if(nPart < nAntiNuMu) {
+            // sample anti muon neutrino
+            sampleFrom = [this, Tp](double x) {return this -> SpectrumAntiMuonNeutrino(x, Tp);};
+            Id = -14;
+            pMax = pMaxAntiNuMu;
+        }
+
+        // sampling 
+        double epsProbe, pFunction, pTest;
+        int counter = 0;
+        while (true) {
+            epsProbe = rand.rand() * epsMax;
+            pFunction = sampleFrom(epsProbe);
+            pTest = rand.rand() * pMax;
+            counter++;
+            if(pTest < pFunction)
+                break;
+            if((counter / 10 )== 0) {
+                // *writeOut << counter;
+            }
+        }
+        
+        // check if remaining energy is positiv and create secondary
+        Eleft -= epsProbe;
+        if(Eleft > 0) {
+            cand -> addSecondary(Id, epsProbe);
+        }
+        else {
+            // decide randomly to keep the secondary and break sampling
+            pTest = rand.rand();
+            if(pTest > abs(Eleft) / epsProbe) {
+                cand -> addSecondary(Id, epsProbe);
+            }
+            return;
+        }
+    }
 }
 
 // ---------------------- PHOTON --------------------------------------------------------------
@@ -168,6 +305,7 @@ double HadronicInteractionKamae::SpectrumPhoton(double Esec, double Tp) const {
     double s3 = Photon1232(Esec, Tp);
     double s4 = Photon1600(Esec, Tp);
 
+    *writeOut << "photon" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";
     return s1 + s2 + s3 + s4;
 }
 
@@ -310,7 +448,7 @@ double HadronicInteractionKamae::SpectrumElectron(double Esec, double Tp) const 
     double s3 = Electron1232(Esec, Tp);
     double s4 = Electron1600(Esec, Tp);
 
-    // std::cout << Tp << " " << Esec << " " << s1 << " " << s2 << " " << s3 << " " << s4 << "\n";
+    *writeOut << "e-" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";
     return s1 + s2 + s3 + s4;
 }
 
@@ -347,9 +485,9 @@ double HadronicInteractionKamae::ElectronND(double Esec, double Tp) const {
     a[7] = 432.53 - 883.99 * log10(0.19737 * (y + 3.9)) - 4.1938e4 / pow_integer<2>(y + 8.5518);
     a[8] = -0.12756 + 0.43478 * y - 0.0027797 * y2 - 0.0083074 * y3;
     
-    std::cout << x << "\t";
-    for(short i = 0; i < 9; i++) 
-        std::cout << "a" << i<< " "<< a[i] << "\t";
+    // writeOut << x << "\t";
+    // for(short i = 0; i < 9; i++) 
+        // writeOut << "a" << i<< " "<< a[i] << "\t";
     
 
     double sigma = eq6(x, a);
@@ -394,7 +532,7 @@ double HadronicInteractionKamae::ElectronDiff(double Esec, double Tp) const {
     // kinematic limits
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);
 
     return eq9(x, b) * fKL;
 }
@@ -425,10 +563,10 @@ double HadronicInteractionKamae::Electron1600(double Esec, double Tp) const {
     // kinematic limits
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);
 
     double sigma = eq12(x, d);
-    std::cout << x << " " << sigma << " " << fKL << "\n";
+    // writeOut << x << " " << sigma << " " << fKL << "\n";
     return sigma * fKL;
 }
 
@@ -438,13 +576,15 @@ double HadronicInteractionKamae::SpectrumPositron(double Esec, double Tp) const 
     if (Esec >= Tp) 
         return 0;
 
-    double spec = 0;
-    spec += PositronND(Esec, Tp);
-    spec += PositronDiff(Esec, Tp);
-    spec += Positron1232(Esec, Tp);
-    spec += Positron1600(Esec, Tp);
+    double s1, s2, s3, s4;
+    s1 = PositronND(Esec, Tp);
+    s2 = PositronDiff(Esec, Tp);
+    s3 = Positron1232(Esec, Tp);
+    s4 = Positron1600(Esec, Tp);
 
-    return spec;
+
+    *writeOut << "e+" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";
+    return s1 + s2 + s3 + s4;
 }
 
 double HadronicInteractionKamae::PositronND(double Esec, double Tp) const {
@@ -520,7 +660,7 @@ double HadronicInteractionKamae::PositronDiff(double Esec, double Tp) const {
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }
@@ -547,7 +687,7 @@ double HadronicInteractionKamae::Positron1232(double Esec, double Tp) const {
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);       
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);       
 
     return sigma * fKL;
 }
@@ -575,7 +715,7 @@ double HadronicInteractionKamae::Positron1600(double Esec, double Tp) const {
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);       
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);       
 
     return sigma * fKL;
 }
@@ -591,6 +731,7 @@ double HadronicInteractionKamae::SpectrumElectronNeutrino(double Esec, double Tp
     double s3 = ElectronNeutrino1232(Esec, Tp);
     double s4 = ElectronNeutrino1600(Esec, Tp);
 
+    *writeOut << "nue" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";
     return s1 + s2 + s3 + s4;
 }
 
@@ -668,7 +809,7 @@ double HadronicInteractionKamae::ElectronNeutrinoDiff(double Esec, double Tp) co
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }
@@ -695,7 +836,7 @@ double HadronicInteractionKamae::ElectronNeutrino1232(double Esec, double Tp) co
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }    
@@ -723,7 +864,7 @@ double HadronicInteractionKamae::ElectronNeutrino1600(double Esec, double Tp) co
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }        
@@ -731,6 +872,13 @@ double HadronicInteractionKamae::ElectronNeutrino1600(double Esec, double Tp) co
 // ---------------------- Anti Electron Neutrino --------------------------------------------------------------
 
 double HadronicInteractionKamae::SpectrumAntiElectronNeutrino(double Esec, double Tp) const {
+    
+    // the formulars for the anti electron neutrino allow a infinit expresseion for the diffractive process. This happens for example
+    // when Tp = 1 TeV and Esec = 9.65 GeV is used. Therefore we assume that the spectra of the electron neutrino and the anti electron 
+    // neutrino are the same. 
+    *writeOut << "Bar";
+    // return SpectrumElectronNeutrino(Esec, Tp); 
+
     if (Esec >= Tp) 
         return 0.;
     
@@ -738,7 +886,9 @@ double HadronicInteractionKamae::SpectrumAntiElectronNeutrino(double Esec, doubl
     double s2 = AntiElectronNeutrinoDiff(Esec, Tp);
     double s3 = AntiElectronNeutrino1232(Esec, Tp);
     double s4 = AntiElectronNeutrino1600(Esec, Tp);
-    
+
+
+    *writeOut << "nueBar" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";    
     return s1 + s2 + s3 + s4;
 }
 
@@ -811,12 +961,13 @@ double HadronicInteractionKamae::AntiElectronNeutrinoDiff(double Esec, double Tp
     b[6] = 1.4788 + 1.0278 * y - 0.092852 * y2 - 0.0062734 * y3 + 0.01192 * y4;
     b[7] = 5.1651 + 5.7398 * tanh(-0.37356 * (y + 2.1)) - 0.22234 * (y - 2.7889);
 
+    // std::cout << b[6] - 1. / b[7] <<"\t" << b[6] << " , " << b[7] << " , " << y << " , " << y2 << " , " << y3 << " , " << y4 << "\n";
     double sigma = eq9(x, b);
 
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }
@@ -848,7 +999,7 @@ double HadronicInteractionKamae::AntiElectronNeutrino1600(double Esec, double Tp
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }
@@ -864,6 +1015,7 @@ double HadronicInteractionKamae::SpectrumMuonNeutrino(double Esec, double Tp) co
     double s3 = MuonNeutrino1232(Esec, Tp);
     double s4 = MuonNeutrino1600(Esec, Tp);
 
+    *writeOut << "numu" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";
     return s1 + s2 + s3 + s4;
 }
 
@@ -942,7 +1094,7 @@ double HadronicInteractionKamae::MuonNeutrinoDiff(double Esec, double Tp) const 
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;
 }
@@ -969,7 +1121,7 @@ double HadronicInteractionKamae::MuonNeutrino1232(double Esec, double Tp) const 
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;    
 }
@@ -997,7 +1149,7 @@ double HadronicInteractionKamae::MuonNeutrino1600(double Esec, double Tp) const 
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL;  
 }
@@ -1013,6 +1165,7 @@ double HadronicInteractionKamae::SpectrumAntiMuonNeutrino(double Esec, double Tp
     double s3 = AntiMuonNeutrino1232(Esec, Tp);
     double s4 = AntiMuonNeutrino1600(Esec, Tp);
 
+    *writeOut << "numuBar" << "\t" << Tp / TeV << "\t" << Esec / GeV << "\t" << s1 << "\t" << s2 << "\t" << s3 << "\t" << s4 << "\n";
     return s1 + s2 + s3 + s4;
 }
 
@@ -1091,7 +1244,7 @@ double HadronicInteractionKamae::AntiMuonNeutrinoDiff(double Esec, double Tp) co
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL; 
 }
@@ -1118,7 +1271,7 @@ double HadronicInteractionKamae::AntiMuonNeutrino1232(double Esec, double Tp) co
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL; 
 }
@@ -1146,9 +1299,7 @@ double HadronicInteractionKamae::AntiMuonNeutrino1600(double Esec, double Tp) co
     // kinematic limits (for all species, diff and res)
     double Wdiff = 75.;
     double Lmax = y + 3;
-    double fKL = 1 / (exp(Wdiff * (x - Lmax)) + 1);    
+    double fKL = 1 / (exp(Wdiff / (x - Lmax)) + 1);    
 
     return sigma * fKL; 
 }
-
-

@@ -2,6 +2,7 @@
 #include <crpropa/Vector3.h>
 #include <crpropa/Units.h>
 #include <crpropa/Common.h>
+#include <crpropa/Version.h>
 
 #include <string>
 #include <fstream>
@@ -486,3 +487,121 @@ void ObserverHistogram4D::process(Candidate *cand) const {
 	double w0 = hist -> data[iX][iY][iZ][iE];
 	hist -> setValue(w0 + w, iX, iY, iZ, iE);
 }
+
+// ---------------------------------------------------------------------------------------------
+
+// inline double fmodulo (double v1, double v2) {
+// 	// modulo operation from planck math utils
+// 	using namespace std;
+// 	if (v1>=0)
+//     return (v1<v2) ? v1 : fmod(v1,v2);
+// 	double tmp=fmod(v1,v2)+v2;
+// 	return (tmp==v2) ? 0. : tmp;
+// }
+
+// ObserverHistogram::ObserverHistogram(int nSide, std::string folder, std::string saveName): folder(folder), saveName(saveName) {
+// 	setNSide(nSide);
+// }
+
+// void ObserverHistogram::process(Candidate *cand) const {
+// 	Vector3d pos = cand -> current.getPosition();
+// 	if (onEarth) {
+// 		pos += Vector3d(8.5 * kpc, 0., 0.);
+// 	}
+// 	int bin = getBinNumber(pos);
+// 	int SN0 = cand -> getSourceSerialNumber();
+
+// #pragma omp critical
+// 	{	
+// 		std::cout << "start writing \n";
+// 		(*file_outs[bin]) << SN0 << "\n";
+// 	}
+
+// 	// deactivate after detection
+// 	cand -> setActive(false);
+// }
+
+// void ObserverHistogram::initFiles() {
+// 	for (int i = 0; i < npix; i++){
+// 		std::stringstream file;
+// 		file << folder << "/" << i << "_" << saveName;
+
+// 		// std::shared_ptr<std::ofstream> outfile(new std::ofstream);
+// 		// outfile -> open(file.str());
+// 		file_outs.push_back(new std::ostream(file.str(), std::ios::binary));
+// 		std::stringsteam out;
+// 		out << "# ObserverHistogram Bin: " << i << "\n";
+// 		out << "# List of serial number at source \n";
+// 		out << "# CRPropa version: " << g_GIT_DESC << "\n#\n";
+// 		file_outs[i] -> write(out.str());
+// 	}
+// }
+
+// void ObserverHistogram::setNSide(int n) {
+// 	nSide = n;
+// 	npface = nSide * nSide;
+// 	ncap = (npface - nSide)<<1;
+// 	npix = 12 * npface;
+// 	initFiles();
+// }
+
+// int ObserverHistogram::getBinNumber(Vector3d &position) const {
+// 	/**
+// 	 * @brief bin position for a position in the healpix ordering
+// 	 * 
+// 	 * Healpix bin position for a given position in centered coordinates. 
+// 	 * Only Healpix Ordering RING is supported. 
+// 	 * This subroutine is extracted from healpix_base.cc (Version 3.82 of healpix)
+// 	 */
+// 	double theta = position.getTheta();
+// 	double z = std::cos(theta);
+// 	double za = abs(z);
+// 	double phi = position.getPhi();
+
+// 	double tt = fmodulo(phi / M_PI_2, 4.0); // in [0,4)
+	
+// 	if(za < 2./3.) { // Equatorial region
+// 		int nl4 = 4 * nSide;
+// 		double temp1 = nSide * (0.5 + tt);
+// 		double temp2 = nSide * z * 0.75;
+// 		int jp = int(temp1 - temp2); // index of   ascending edge line
+// 		int jm = int(temp1 + temp2); // index of descendinge edge line
+
+// 		// ring number counted from z = 2/3
+// 		int ir = nSide + 1 + jp - jm; // in {1, 2n+1}
+// 		int kshift = 1 - (ir&1); // kshift = 1 if ir even, 0 otherwise
+
+// 		int t1 = jp + jm - nSide + kshift + 1 + nl4 * 2;
+// 		int ip = (t1>>1) & (nl4 - 1);	// in {ß0, 4n -1}, case order_>0 from healpix_base.cc
+// 		return ncap + (ir - 1) * nl4 + ip;
+// 	}
+// 	else { // North & South polar caps
+// 		bool have_sth = false;
+// 		double sth = 0.;
+// 		if((theta < 0.01) or (theta > M_PI - 0.01)) {
+// 			have_sth = true;
+// 			sth = std::sin(theta);
+// 		}
+// 		double tp = tt - int(tt);
+// 		double tmp = ((za < 0.99)||(!have_sth)) ? (nSide * std::sqrt(3 * (1 - za))) : nSide * sth / std::sqrt((1 + za) / 3.);
+// 		int jp = int(tp * tmp); // increasing edge line index
+// 		int jm = int((1. - tp) * tmp); // decreasing edge line index
+
+// 		int ir = jp + jm + 1; // ring number counted from closest pole
+// 		int ip = int(tt * ir); // in {0, 4 * ir - 1}
+
+// 		return (z>0) ? 2 * ir * (ir - 1) + ip : npix - 2 * ir * (ir - 1) + ip;
+// 	}
+// }
+
+// int ObserverHistogram::getNSide() const {
+// 	return nSide;
+// }
+
+// void ObserverHistogram::closeAll() {
+// 	for (int i = 0; i < npix; i++)
+// 	{
+// 		file_outs[i] -> close();
+// 	}
+	
+// }

@@ -113,6 +113,7 @@ public:
 	}
 };
 
+
 } // namespace crpropa
 
 #endif // CRPROPA_HADRONICINTERACTION_H

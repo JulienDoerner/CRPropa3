@@ -153,4 +153,27 @@ public:
 };
 
 
+// class ObserverHistogram: public Module {
+// private:
+// 	int nSide, npface, ncap, npix;
+// 	std::string folder;
+// 	std::string saveName;
+// 	bool onEarth = false;
+// 	std::vector<std::ostream* > file_outs;
+
+// public:
+// 	ObserverHistogram(int nSide, std::string folder, std::string saveName);
+	
+// 	void process(Candidate* cand) const;
+
+// 	void initFiles();
+// 	void setNSide(int n);
+
+// 	int getNSide() const;
+// 	int getBinNumber(Vector3d &position) const;
+
+// 	void closeAll();
+// };
+
+
 #endif // CRPROPA_PLUGIN_H
