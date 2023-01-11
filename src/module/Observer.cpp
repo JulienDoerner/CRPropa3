@@ -334,10 +334,14 @@ std::string ObserverParticleIdVeto::getDescription() const {
 // ObserverTimeEvolution --------------------------------------------------------
 ObserverTimeEvolution::ObserverTimeEvolution() {}
 
-ObserverTimeEvolution::ObserverTimeEvolution(double min, double time, double numb) {
-  for (size_t i = 0; i < numb; i++) {
-    addTime(min + i * time);
-  }
+ObserverTimeEvolution::ObserverTimeEvolution(double min, double dist, double numb) {
+	double max = min + numb * dist;
+	bool log = false;
+	addTimeRange(min, max, numb, log);
+}
+
+ObserverTimeEvolution::ObserverTimeEvolution(double min, double max, double numb, bool log) {
+	addTimeRange(min, max, numb, log);
 }
 
 
@@ -379,14 +383,22 @@ DetectionState ObserverTimeEvolution::checkDetection(Candidate *c) const {
 
 			return DETECTED;
 		}
-
 	}
 	return NOTHING;
-
 }
 
 void ObserverTimeEvolution::addTime(const double& t) {
 	detList.push_back(t);
+}
+
+void ObserverTimeEvolution::addTimeRange(double min, double max, double numb, bool log) {
+	for (size_t i = 0; i < numb; i++) {
+		if (log == true) {
+			addTime(min * pow(max / min, i / (numb - 1.0)));
+		} else {
+			addTime(min + i * (max - min) / numb);
+		}
+	}
 }
 
 const std::vector<double>& ObserverTimeEvolution::getTimes() const {
@@ -410,7 +422,7 @@ std::string ObserverTimeEvolution::getDI() const {
 	return DI;
 }
 // ObserverSurface--------------------------------------------------------------
-ObserverSurface::ObserverSurface(Surface* _surface) : surface(_surface) { };
+ObserverSurface::ObserverSurface(Surface* _surface) : surface(_surface) { }
 
 DetectionState ObserverSurface::checkDetection(Candidate *candidate) const
 {
@@ -424,7 +436,7 @@ DetectionState ObserverSurface::checkDetection(Candidate *candidate) const
 			return NOTHING;
 		else
 			return DETECTED;
-};
+}
 
 std::string ObserverSurface::getDescription() const {
 	std::stringstream ss;
@@ -450,78 +462,5 @@ std::string ObserverInsideSurface::getDescription() const {
 	ss << "ObserverInsideSurface: << " << surface->getDescription();
 	return ss.str();
 };
-
-// ObserverDetectionLengthEvolution --------------------------------------------------------
-ObserverDetectionLengthEvolution::ObserverDetectionLengthEvolution() {}
-
-ObserverDetectionLengthEvolution::ObserverDetectionLengthEvolution(double min, double dist, double numb) {
-  for (size_t i = 0; i < numb; i++) {
-    addTime(min + i * dist);
-  }
-}
-
-
-DetectionState ObserverDetectionLengthEvolution::checkDetection(Candidate *c) const {
-
-	if (detList.size()) {
-		double length = c->getTrajectoryLength();
-		size_t index;
-		const std::string DI = "DetectionIndex";
-		std::string value;
-
-		// Load the last detection index
-		if (c->hasProperty(DI)) {
-			index = c->getProperty(DI).asUInt64();
-		}
-		else {
-			index = 0;
-		}
-
-		// Break if the particle has been detected once for all detList entries.
-		if (index > detList.size()) {
-			return NOTHING;
-		}
-
-		// Calculate the distance to next detection
-		double distance = length - detList[index];
-
-		// Limit next Step and detect candidate
-		// Increase the index by one in case of detection
-		if (distance < 0.) {
-			c->limitNextStep(-distance);
-			return NOTHING;
-		}
-		else {
-
-			if (index < detList.size()-1) {
-				c->limitNextStep(detList[index+1]-length);
-			}
-			c->setProperty(DI, Variant::fromUInt64(index+1));
-
-			return DETECTED;
-		}
-
-	}
-	return NOTHING;
-
-}
-
-void ObserverDetectionLengthEvolution::addTime(const double& t) {
-	detList.push_back(t);
-}
-
-const std::vector<double>& ObserverDetectionLengthEvolution::getTimes() const {
-	return detList;
-}
-
-std::string ObserverDetectionLengthEvolution::getDescription() const {
-	std::stringstream s;
-	s << "List of Detection lengths in kpc";
-	for (size_t i = 0; i < detList.size(); i++)
-	  s << "  - " << detList[i] / kpc;
-	return s.str();
-}
-
-
 
 } // namespace crpropa

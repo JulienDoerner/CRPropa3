@@ -142,7 +142,6 @@ void SynchrotronRadiation::process(Candidate *candidate) const {
 	}
 
 	// apply energy loss and limit next step
-	double w0 = candidate->getWeight();
 	double E = candidate->current.getEnergy();
 	candidate->current.setEnergy(E - dE);
 	candidate->limitNextStep(limit * E / dEdx);
@@ -201,13 +200,13 @@ void SynchrotronRadiation::process(Candidate *candidate) const {
 	for (int i = 0; i < energies.size(); i++) {
 		double Ephoton = energies[i];
 		double f = Ephoton / (E - dE0);
-		double w = w0 * w1 / pow(f, thinning);
+		double w = w1 / pow(f, thinning);
 
 		// thinning procedure: accepts only a few random secondaries
 		if (random.rand() < pow(f, thinning)) {
 			Vector3d pos = random.randomInterpolatedPosition(candidate->previous.getPosition(), candidate->current.getPosition());
 			if (Ephoton > secondaryThreshold) // create only photons with energies above threshold
-				candidate->addSecondary(22, Ephoton, pos, w);
+				candidate->addSecondary(22, Ephoton, pos, w, interactionTag);
 		}
 	}
 }
@@ -228,6 +227,14 @@ std::string SynchrotronRadiation::getDescription() const {
 	if (thinning > 0)
 		s << "thinning parameter: " << thinning; 
 	return s.str();
+}
+
+void SynchrotronRadiation::setInteractionTag(std::string tag) {
+	interactionTag = tag;
+}
+
+std::string SynchrotronRadiation::getInteractionTag() const {
+	return interactionTag;
 }
 
 } // namespace crpropa

@@ -9,7 +9,11 @@
 
 
 namespace crpropa {
-
+/**
+ * \addtogroup EnergyLosses
+ * @{
+ */
+ 
 /**
  @class EMPairProduction
  @brief Electron-pair production of photons with background photons.
@@ -28,6 +32,7 @@ private:
 	bool haveElectrons;
 	double limit;
 	double thinning;
+	std::string interactionTag = "EMPP";
 
 	// tabulated interaction rate 1/lambda(E)
 	std::vector<double> tabEnergy;  //!< electron energy in [J]
@@ -39,17 +44,21 @@ private:
 	std::vector< std::vector<double> > tabCDF;  //!< cumulative interaction rate
 
 public:
-	EMPairProduction(
-		ref_ptr<PhotonField> photonField, //!< target photon background
-		bool haveElectrons = false,    //!< switch to create secondary electron pair
-		double thinning = 0,           //!< weighted sampling of secondaries (0: all particles are tracked; 1: maximum thinning)
-		double limit = 0.1             //!< step size limit as fraction of mean free path
-		);
+	/** Constructor
+	 @param photonField		target photon field
+	 @param haveElectrons	if true, add secondary electrons as candidates
+	 @param thinning		weighted sampling of secondaries (0: all particles are tracked; 1: maximum thinning)
+	 @param limit			step size limit as fraction of mean free path
+	 */
+	EMPairProduction(ref_ptr<PhotonField> photonField, bool haveElectrons = false, double thinning = 0,double limit = 0.1);
 
 	void setPhotonField(ref_ptr<PhotonField> photonField);
 	void setHaveElectrons(bool haveElectrons);
 	void setLimit(double limit);
 	void setThinning(double thinning);
+	
+	void setInteractionTag(std::string tag);
+	std::string getInteractionTag() const;
 
 	void initRate(std::string filename);
 	void initCumulativeRate(std::string filename);
@@ -57,6 +66,8 @@ public:
 	void performInteraction(Candidate *candidate) const;
 	void process(Candidate *candidate) const;
 };
+/** @}*/
+
 
 } // namespace crpropa
 

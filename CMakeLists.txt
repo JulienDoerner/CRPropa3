@@ -8,7 +8,7 @@ else(APPLE)
 endif(APPLE)
 
 project(CRPropa Fortran C CXX)
-set(CRPROPA_RELEASE_VERSION >3.1.7)  # Update for new release
+set(CRPROPA_RELEASE_VERSION 3.2+)  # Update for new release
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -37,6 +37,12 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE)
 endif(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE)
 
 SET(SIMD_EXTENSIONS "none" CACHE STRING "Choose which of the SIMD instruction set extensions your target CPU supports. Possible values are \"native\" (use everything that's supported by the CPU you're building on), \"none\", \"avx\", and \"avx+fma\".")
+
+if(SIMD_EXTENSIONS STREQUAL "none")
+  message("With SIMD_EXTENSIONS \"none\" tricubic interpolation of vector grids is not possible. You should set SIMD_EXTENSION to a compatible value (\"avx\", \"avx+fma\", or -- depending on the build CPU -- \"native\"). Trilinear interpolation is still possible.")
+else()
+  add_definitions(-DHAVE_SIMD)
+endif()
 
 if(SIMD_EXTENSIONS STREQUAL "avx")
   SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -msse -msse2 -msse3 -msse4.1 -msse4.2 -mavx" )
@@ -330,7 +336,7 @@ endif(APPLE)
 # Download data files (interaction data, masses, decay data ...)
 # ----------------------------------------------------------------------------
 OPTION(DOWNLOAD_DATA "Download CRPropa data files" ON)
-set(CRPROPA_DATAFILE_VER "2021-07-30")
+set(CRPROPA_DATAFILE_VER "2022-07-06")
 if(DOWNLOAD_DATA)
   message("-- Downloading data file from crpropa.desy.de ~ 65 MB")
   file(DOWNLOAD
@@ -347,6 +353,8 @@ else()
 endif(DOWNLOAD_DATA)
 if(EXISTS ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz)
   execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}/data ${CMAKE_BINARY_DIR}/data/ WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}/ WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 else()
   message(WARNING "CRPropa data file not found at ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz
 CRPropa should compile, but will likely not work properly! Please install data file manually, or use the automatic download which is enabled by default.")
@@ -416,6 +424,7 @@ add_library(crpropa SHARED
   src/magneticField/JF12FieldSolenoidal.cpp
   src/magneticField/MagneticField.cpp
   src/magneticField/MagneticFieldGrid.cpp
+  src/magneticField/PolarizedSingleModeMagneticField.cpp
   src/magneticField/PT11Field.cpp
   src/magneticField/turbulentField/GridTurbulence.cpp
   src/magneticField/turbulentField/HelicalGridTurbulence.cpp
@@ -562,7 +571,7 @@ add_definitions(-DCRPROPA_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 install(TARGETS crpropa DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY ${CMAKE_BINARY_DIR}/include/ DESTINATION include FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}/data/ DESTINATION share/crpropa/ PATTERN ".git" EXCLUDE)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/data/ DESTINATION share/crpropa/ PATTERN ".git" EXCLUDE)
 
 install(DIRECTORY libs/kiss/include/ DESTINATION include)
 
