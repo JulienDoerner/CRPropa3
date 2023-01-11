@@ -49,6 +49,24 @@ std::string UniformAdvectionField::getDescription() const {
 
 //----------------------------------------------------------------
 
+UniformAdvectionFieldFromPlane::UniformAdvectionFieldFromPlane(double value) : value(value) {}
+
+Vector3d UniformAdvectionFieldFromPlane::getField(const Vector3d &pos) const {
+	return Vector3d(0, 0, value) * pos.z / fabs(pos.z);
+}
+
+double UniformAdvectionFieldFromPlane::getDivergence(const Vector3d &pos) const {
+	return 0;
+}
+
+std::string UniformAdvectionFieldFromPlane::getDescription() const {
+	std::stringstream s;
+	s << "Uniform Advection field from plane with velocity " << value / km * sec << "km/s \n";
+	return s.str();
+}
+
+//----------------------------------------------------------------
+
 ConstantSphericalAdvectionField::ConstantSphericalAdvectionField(const Vector3d origin, double vWind) {
 	setOrigin(origin);
 	setVWind(vWind);

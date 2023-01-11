@@ -58,6 +58,21 @@ public:
 	std::string getDescription() const;
 };
 
+/**
+ * @class UniformAdvectionFieldFromPlane
+ * @brief constant advection field in z-direction away from the z=0 plane.
+ * 
+ * The field will be Vector3d(0, 0, +/- v) with a given velocity v. The sign will be choosen from the sign of the z-coordinate.
+ */
+class UniformAdvectionFieldFromPlane: public AdvectionField {
+	double value;
+public: 
+	UniformAdvectionFieldFromPlane(const double value);
+	Vector3d getField(const Vector3d &position) const;
+	double getDivergence(const Vector3d &position) const;
+
+	std::string getDescription() const;
+};
 
 /**
 @class ConstantSphericalAdvectionField

@@ -18,6 +18,28 @@ TEST(testUniformAdvectionField, SimpleTest) {
 	EXPECT_DOUBLE_EQ(D, 0.);
 }
 
+TEST(testUniformAdvectionFieldFromPlane, SimpleTest) {
+	UniformAdvectionFieldFromPlane field(5.);
+	
+	// over the plane
+	Vector3d pos1(3, 4, 1);
+	Vector3d a = field.getField(pos1);
+	EXPECT_DOUBLE_EQ(a.x, 0);
+	EXPECT_DOUBLE_EQ(a.y, 0);
+	EXPECT_DOUBLE_EQ(a.z, 5);
+	double div1 = field.getDivergence(pos1);
+	EXPECT_DOUBLE_EQ(div1, 0);
+
+	// under the plane
+	Vector3d pos2(3, -1, -6);
+	Vector3d b = field.getField(pos2);
+	EXPECT_DOUBLE_EQ(b.x, 0);
+	EXPECT_DOUBLE_EQ(b.y, 0);
+	EXPECT_DOUBLE_EQ(b.z, -5);
+	double div2 = field.getDivergence(pos2);
+	EXPECT_DOUBLE_EQ(div2, 0);
+}
+
 TEST(testAdvectionFieldList, SimpleTest) {
 	// Test a list of three advection fields
 	AdvectionFieldList A;
