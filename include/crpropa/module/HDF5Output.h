@@ -96,6 +96,8 @@ class HDF5Output: public Output {
 	time_t lastFlush;
 	unsigned int flushLimit;
 	unsigned int candidatesSinceFlush;
+	
+	hid_t doubleType;	// defines the accurency in which doubles are stored
 public:
 	HDF5Output();
 	HDF5Output(const std::string &filename);
@@ -116,6 +118,7 @@ public:
 	void close();
 	void flush() const;
 
+	void setDoubleTypeToFloat(bool useFloat);
 };
 /** @}*/
 
