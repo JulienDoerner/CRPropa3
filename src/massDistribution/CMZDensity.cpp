@@ -2,7 +2,9 @@
 
 namespace crpropa {
     
-CMZDensity::CMZDensity() { }
+CMZDensity::CMZDensity(bool use) {
+    useClouds = use; 
+}
 
 double CMZDensity::getDensity(const Vector3d &position) const {
     return getH2Density(position);
@@ -21,6 +23,7 @@ double CMZDensity::getH2Density(const Vector3d &position) const {
         double z=position.z;
         double cmm=1000000;
         
+        if(useClouds) {
         ////SgrC//"The Galactic Center Molecular Cloud Survey" Kaufmann et al. 2016
         double cloud_mid_y=std::sin(359.45*pi/180)*8.5*kpc;
         double cloud_mid_x=0;
@@ -293,6 +296,8 @@ double CMZDensity::getH2Density(const Vector3d &position) const {
                 M= 2.2e3 *mSun;
                 n+= 3.e4*cmm; //M/V *1/m_p;
             }}
+        
+} // end of all cloud components
         // intercloud medium in CMZ from Ferriere 2007
         x = -position.x;
         y = position.y;
