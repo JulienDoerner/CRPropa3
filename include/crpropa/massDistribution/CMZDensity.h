@@ -19,6 +19,7 @@ namespace crpropa {
     public:
         CMZDensity(bool useClouds = true);
         double getDensity(const Vector3d &position) const;
+        double getHIDensity(const Vector3d &position) const;
         double getH2Density(const Vector3d &position) const;
         double getNucleonDensity(const Vector3d &position) const;
         
