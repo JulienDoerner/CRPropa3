@@ -56,7 +56,7 @@ double CMZDensity::getH2Density(const Vector3d &position) const {
             
             double X_C = 125 * pc;
             double Lc = 137 * pc;
-            double Hc = 18 * pc;
+            double Hc = 30 * pc;
             
             double arg1 = pow_integer<4>( (std::sqrt(xX * xX + (2.5*yY * 2.5 * yY))  - X_C ) / Lc);
             double arg2 = pow_integer<2>( z / Hc);
