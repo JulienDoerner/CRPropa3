@@ -51,7 +51,7 @@ private:
 public:
     DiffusionPowerLaw(double alpha, double rig_norm, double norm, double epsilon);
 
-    Vector3d getTensorDiagonal(double E) const;
+    Vector3d getTensorDiagonal(double E, int id = 0, double magneticField = 0.) const;
 };
 
 

@@ -3,7 +3,10 @@
 
 using namespace crpropa;
 
-Vector3d DiffusionPowerLaw::getTensorDiagonal(double E) const {
+DiffusionPowerLaw::DiffusionPowerLaw(double alpha, double rig, double norm, double epsilon) : 
+    alpha(alpha), rig_norm(rig), norm(norm), epsilon(epsilon) { }
+
+Vector3d DiffusionPowerLaw::getTensorDiagonal(double E, int id, double B) const {
     Vector3d diff = Vector3d(1, epsilon, epsilon); 
     diff *= norm * pow(E / rig_norm, alpha); 
     return diff;
