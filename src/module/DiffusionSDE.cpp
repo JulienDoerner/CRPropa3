@@ -26,9 +26,10 @@ DiffusionSDE::DiffusionSDE(ref_ptr<MagneticField> magneticField, double toleranc
   	setMaximumStep(maxStep);
   	setMinimumStep(minStep);
   	setTolerance(tolerance);
-  	setEpsilon(epsilon);
+  	// setEpsilon(epsilon);
   	setScale(1.);
-  	setAlpha(1./3.);
+  	// setAlpha(1./3.);
+	diffusionTensor = new DiffusionPowerLaw(1./3, 4 * GeV, 6.1e24, epsilon);
 	}
 
 DiffusionSDE::DiffusionSDE(ref_ptr<MagneticField> magneticField, ref_ptr<AdvectionField> advectionField, double tolerance, double minStep, double maxStep, double epsilon) :
@@ -39,10 +40,11 @@ DiffusionSDE::DiffusionSDE(ref_ptr<MagneticField> magneticField, ref_ptr<Advecti
 	setMaximumStep(maxStep);
 	setMinimumStep(minStep);
 	setTolerance(tolerance);
-	setEpsilon(epsilon);
+	// setEpsilon(epsilon);
 	setScale(1.);
-	setAlpha(1./3.);
-  	}
+	// setAlpha(1./3.);
+	diffusionTensor = new DiffusionPowerLaw(1./3., 4 * GeV, 6.1e24, epsilon);
+}
 
 void DiffusionSDE::process(Candidate *candidate) const {
 
@@ -78,7 +80,18 @@ void DiffusionSDE::process(Candidate *candidate) const {
 
     // Calculate the Diffusion tensor
 	double BTensor[] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
-	calculateBTensor(rig, BTensor, PosIn, DirIn, z);
+	double BTen2[] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+	// calculateBTensor(rig, BTen2, PosIn, DirIn, z);
+	Vector3d difCoeff = diffusionTensor -> getTensorDiagonal(current.getEnergy(), current.getId(), magneticField->getField(PosIn).getR());
+	difCoeff *= scale;
+    BTensor[0] = pow( 2  * difCoeff.x, 0.5);
+    BTensor[4] = pow(2 * difCoeff.y, 0.5);
+    BTensor[8] = pow(2 * difCoeff.z, 0.5);
+	if(debug) {
+		for(int i = 0; i<9; i++) {
+			std::cout << "no: " << i << "\t calc_tens: " << BTen2[i] << "\t vector: " << BTensor[i] << "\n";
+		}
+	}
 
 
     // Generate random numbers
@@ -257,15 +270,19 @@ void DiffusionSDE::driftStep(const Vector3d &pos, Vector3d &linProp, double h) c
 	return;
 }
 
-void DiffusionSDE::calculateBTensor(double r, double BTen[], Vector3d pos, Vector3d dir, double z) const {
-
-    double DifCoeff = scale * 6.1e24 * pow((std::abs(r) / 4.0e9), alpha);
-    BTen[0] = pow( 2  * DifCoeff, 0.5);
-    BTen[4] = pow(2 * epsilon * DifCoeff, 0.5);
-    BTen[8] = pow(2 * epsilon * DifCoeff, 0.5);
-    return;
-
+void DiffusionSDE::setDiffusionTensor(ref_ptr<DiffusionTensor> tensor) {
+	diffusionTensor = tensor;
 }
+
+// void DiffusionSDE::calculateBTensor(double r, double BTen[], Vector3d pos, Vector3d dir, double z) const {
+// 	double alpha = 1./3;
+// 	double epsilon = 0.1;
+//     double DifCoeff = scale * 6.1e24 * pow((std::abs(r) / 4.0e9), alpha);
+//     BTen[0] = pow( 2  * DifCoeff, 0.5);
+//     BTen[4] = pow(2 * epsilon * DifCoeff, 0.5);
+//     BTen[8] = pow(2 * epsilon * DifCoeff, 0.5);
+//     return;
+// }
 
 
 void DiffusionSDE::setMinimumStep(double min) {
@@ -282,7 +299,6 @@ void DiffusionSDE::setMaximumStep(double max) {
 	maxStep = max;
 }
 
-
 void DiffusionSDE::setTolerance(double tol) {
 	if ((tol > 1) or (tol < 0))
 		throw std::runtime_error(
@@ -290,20 +306,20 @@ void DiffusionSDE::setTolerance(double tol) {
 	tolerance = tol;
 }
 
-void DiffusionSDE::setEpsilon(double e) {
-	if ((e > 1) or (e < 0))
-		throw std::runtime_error(
-				"DiffusionSDE: epsilon not in range 0-1");
-	epsilon = e;
-}
+// void DiffusionSDE::setEpsilon(double e) {
+// 	if ((e > 1) or (e < 0))
+// 		throw std::runtime_error(
+// 				"DiffusionSDE: epsilon not in range 0-1");
+// 	epsilon = e;
+// }
 
 
-void DiffusionSDE::setAlpha(double a) {
-	if ((a > 2.) or (a < 0))
-		throw std::runtime_error(
-				"DiffusionSDE: alpha not in range 0-2");
-	alpha = a;
-}
+// void DiffusionSDE::setAlpha(double a) {
+// 	if ((a > 2.) or (a < 0))
+// 		throw std::runtime_error(
+// 				"DiffusionSDE: alpha not in range 0-2");
+// 	alpha = a;
+// }
 
 void DiffusionSDE::setScale(double s) {
 	if (s < 0)
@@ -332,13 +348,13 @@ double DiffusionSDE::getTolerance() const {
 	return tolerance;
 }
 
-double DiffusionSDE::getEpsilon() const {
-	return epsilon;
-}
+// double DiffusionSDE::getEpsilon() const {
+// 	return epsilon;
+// }
 
-double DiffusionSDE::getAlpha() const {
-	return alpha;
-}
+// double DiffusionSDE::getAlpha() const {
+// 	return alpha;
+// }
 
 double DiffusionSDE::getScale() const {
 	return scale;
@@ -388,13 +404,13 @@ std::string DiffusionSDE::getDescription() const {
 	s << "maxStep: " << maxStep / kpc  << " kpc, ";
 	s << "tolerance: " << tolerance << "\n";
 
-	if (epsilon != 0.1) {
-	  s << "epsilon: " << epsilon << ", ";
-	  }
+	// if (epsilon != 0.1) {
+	//   s << "epsilon: " << epsilon << ", ";
+	//   }
 
-	if (alpha != 1./3.) {
-	  s << "alpha: " << alpha << "\n";
-	  }
+	// if (alpha != 1./3.) {
+	//   s << "alpha: " << alpha << "\n";
+	//   }
 
 	if (scale != 1.) {
 	  s << "D_0: " << scale*6.1e24 << " m^2/s" << "\n";

@@ -11,6 +11,7 @@
 #include "crpropa/Module.h"
 #include "crpropa/magneticField/MagneticField.h"
 #include "crpropa/advectionField/AdvectionField.h"
+#include "crpropa/diffusionTensor/DiffusionTensor.h"
 #include "crpropa/Units.h"
 #include "crpropa/Random.h"
 
@@ -37,12 +38,14 @@ class DiffusionSDE : public Module{
 private:
 	    ref_ptr<MagneticField> magneticField;
 	    ref_ptr<AdvectionField> advectionField;
+		ref_ptr<DiffusionTensor> diffusionTensor;
 	    double minStep; // minStep/c_light is the minimum integration timestep
 	    double maxStep; // maxStep/c_light is the maximum integration timestep
 	    double tolerance; // tolerance is criterion for step adjustment. Step adjustment takes place when the tangential vector of the magnetic field line is calculated.
-	    double epsilon; // ratio of parallel and perpendicular diffusion coefficient D_par = epsilon*D_perp
-	    double alpha; // power law index of the energy dependent diffusion coefficient: D\propto E^alpha
+	    // double epsilon; // ratio of parallel and perpendicular diffusion coefficient D_par = epsilon*D_perp
+	    // double alpha; // power law index of the energy dependent diffusion coefficient: D\propto E^alpha
 	    double scale; // scaling factor for the diffusion coefficient D = scale*D_0
+		bool debug = false;
 
 public:
 	/** Constructor
@@ -67,13 +70,15 @@ public:
 
 	void tryStep(const Vector3d &Pos, Vector3d &POut, Vector3d &PosErr, double z, double propStep ) const;
 	void driftStep(const Vector3d &Pos, Vector3d &LinProp, double h) const;
-	void calculateBTensor(double rig, double BTen[], Vector3d pos, Vector3d dir, double z) const;
+	// void calculateBTensor(double rig, double BTen[], Vector3d pos, Vector3d dir, double z) const;
+
+	void setDiffusionTensor(ref_ptr<DiffusionTensor> tensor);
 
 	void setMinimumStep(double minStep);
 	void setMaximumStep(double maxStep);
 	void setTolerance(double tolerance);
-	void setEpsilon(double kappa);
-	void setAlpha(double alpha);
+	// void setEpsilon(double kappa);
+	// void setAlpha(double alpha);
 	void setScale(double Scale);
 	void setMagneticField(ref_ptr<crpropa::MagneticField> magneticField);
 	void setAdvectionField(ref_ptr<crpropa::AdvectionField> advectionField);
@@ -81,8 +86,8 @@ public:
 	double getMinimumStep() const;
 	double getMaximumStep() const;
 	double getTolerance() const;
-	double getEpsilon() const;
-	double getAlpha() const;
+	// double getEpsilon() const;
+	// double getAlpha() const;
 	double getScale() const;
 	std::string getDescription() const;
   
@@ -98,6 +103,7 @@ public:
 	 @return	  magnetic field vector at the position pos */
 	Vector3d getAdvectionFieldAtPosition(Vector3d pos) const;
 
+	void setDebug(bool b) { debug = b;};
 };
 /** @}*/
 
