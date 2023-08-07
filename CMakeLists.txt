@@ -386,6 +386,7 @@ add_library(crpropa SHARED
   src/Random.cpp
   src/Source.cpp
   src/Variant.cpp
+  src/diffusionTensor/DiffusionTensor.cpp
   src/module/AdiabaticCooling.cpp
   src/module/Acceleration.cpp
   src/module/Boundary.cpp
