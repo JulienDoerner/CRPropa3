@@ -46,7 +46,7 @@ private:
 	double trajectoryLength; /**< Comoving distance [m] the candidate has traveled so far */
 	double currentStep; /**< Size of the currently performed step in [m] comoving units */
 	double nextStep; /**< Proposed size of the next propagation step in [m] comoving units */
-	std::string tagOrigin; /**< Name of interaction/source process which creates this particle*/
+	std::string tagOrigin; /**< Name of interaction/source process which created this candidate*/
 
 	static uint64_t nextSerialNumber;
 	uint64_t serialNumber;
@@ -100,7 +100,7 @@ public:
 	double getNextStep() const;
 
 	/**
-	 Sets the tagOriginof the particle. Can be used to trace back the interactions
+	 Sets the tagOrigin of the candidate. Can be used to trace back the interactions
 	 */
 	void setTagOrigin(std::string tagOrigin);
 	std::string getTagOrigin() const;
@@ -117,8 +117,7 @@ public:
 
 	/**
 	 Add a new candidate to the list of secondaries.
-	 @param id		particle ID of the secondary
-	 @param energy	energy of the secondary
+	 @param c Candidate
 
 	 Adds a new candidate to the list of secondaries of this candidate.
 	 The secondaries Candidate::source and Candidate::previous state are set to the _source_ and _previous_ state of its parent.
@@ -127,7 +126,22 @@ public:
 	 */
 	void addSecondary(Candidate *c);
 	inline void addSecondary(ref_ptr<Candidate> c) { addSecondary(c.get()); };
+	/**
+	 Add a new candidate to the list of secondaries.
+	 @param id			particle ID of the secondary
+	 @param energy		energy of the secondary
+	 @param w			weight of the secondary
+	 @param tagOrigin 	tag of the secondary
+	 */
 	void addSecondary(int id, double energy, double w = 1., std::string tagOrigin = "SEC");
+	/**
+	 Add a new candidate to the list of secondaries.
+	 @param id			particle ID of the secondary
+	 @param energy		energy of the secondary
+	 @param position	start position of the secondary
+	 @param w			weight of the secondary
+	 @param tagOrigin 	tag of the secondary
+	 */
 	void addSecondary(int id, double energy, Vector3d position, double w = 1., std::string tagOrigin = "SEC");
 	void clearSecondaries();
 

@@ -164,7 +164,7 @@ void HDF5Output::open(const std::string& filename) {
 		H5Tinsert(sid, "P1z", HOFFSET(OutputRow, P1z), doubleType);
 	}
 	if (fields.test(WeightColumn))
-		H5Tinsert(sid, "weight", HOFFSET(OutputRow, weight), doubleType);
+		H5Tinsert(sid, "W", HOFFSET(OutputRow, weight), doubleType);
 	
 	if (fields.test(CandidateTagColumn)) 
 		H5Tinsert(sid, "tag", HOFFSET(OutputRow, tag), H5T_C_S1);
