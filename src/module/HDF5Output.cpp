@@ -53,6 +53,7 @@ HDF5Output::HDF5Output() :  Output(), filename(), file(-1), sid(-1), dset(-1), d
 
 HDF5Output::HDF5Output(const std::string& filename) :  Output(), filename(filename), file(-1), sid(-1), dset(-1), dataspace(-1), candidatesSinceFlush(0), flushLimit(std::numeric_limits<unsigned int>::max()) {
 	doubleType = H5T_NATIVE_DOUBLE;
+	open(filename);
 }
 
 HDF5Output::HDF5Output(const std::string& filename, OutputType outputtype) :  Output(outputtype), filename(filename), file(-1), sid(-1), dset(-1), dataspace(-1), candidatesSinceFlush(0), flushLimit(std::numeric_limits<unsigned int>::max()) {
@@ -96,8 +97,6 @@ herr_t HDF5Output::insertDoubleAttribute(const std::string &key, const double &v
 
 	return status;
 }
-
-
 
 void HDF5Output::open(const std::string& filename) {
 	file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
