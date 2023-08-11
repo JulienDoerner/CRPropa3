@@ -49,9 +49,39 @@ private:
     double epsilon = 0.1; // ratio between parallel and perpendicular diffusion
 
 public:
-    DiffusionPowerLaw(double alpha, double rig_norm, double norm, double epsilon);
-
+    DiffusionPowerLaw(double alpha = 1./3, double rig_norm = 4 * GeV, double norm = 6.1e24, double epsilon = 0.1);
     Vector3d getTensorDiagonal(double E, int id = 0, double magneticField = 0.) const;
+
+    void setAlpha(double alpha); 
+    void setEpsilon(double eps);
+
+    double getAlpha() const;
+    double getEpsilon() const;
+};
+
+class DiffusionBrokenPowerlaw: public DiffusionTensor {
+private: 
+    double alpha1, alpha2; // indices before/after break 
+    double E_break; // Energy of the break
+    double norm; // norm at the break point 
+    double epsilon; // anisotropy of the tensor
+
+public: 
+    DiffusionBrokenPowerlaw(double alpha1, double alpha2, double Eb, double norm, double eps= 0.1);
+
+    void setAlpha1(double a1);
+    void setAlpha2(double a2); 
+    void setEnergyBreak(double Eb);
+    void setNorm(double norm); 
+    void setEpsilon(double eps); 
+
+    Vector3d getTensorDiagonal(double E, int id = 0, double B = 0) const; 
+
+    double getAlpha1() const;
+    double getAlpha2() const;
+    double getEnergyBreak() const;
+    double getNorm() const;
+    double getEpsilon() const;
 };
 
 
@@ -63,7 +93,7 @@ private:
     const double softness[4] = { 0.0630, 0.75, 0.167, 0.022 }; // softness of the spectral breaks
 
 public: 
-    Vector3d getTensorDiagonal(double Energy) const;
+    Vector3d getTensorDiagonal(double Energy, int id = 0, double B = 0) const;
 
     std::string getDescription() {
         return "Diffusion Tensor with the best fit of the CRINGE model.\n";
