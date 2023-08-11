@@ -24,3 +24,10 @@ cmake/CMakeFiles/
 *.dat
 *.ipynb_checkpoints
 *.idea
+
+.vscode/
+old_Versions/
+Testing
+
+include/healpix_base
+include/kiss 
