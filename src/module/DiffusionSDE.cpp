@@ -83,6 +83,10 @@ void DiffusionSDE::process(Candidate *candidate) const {
 	double BTen2[] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
 	// calculateBTensor(rig, BTen2, PosIn, DirIn, z);
 	Vector3d difCoeff = diffusionTensor -> getTensorDiagonal(current.getEnergy(), current.getId(), magneticField->getField(PosIn).getR());
+	
+	if (difCoeff.getR2() == 0){
+		KISS_LOG_WARNING << "DiffusionSDE has a diffusion coefficent with only 0 entries.\n";
+	}
 	difCoeff *= scale;
     BTensor[0] = pow( 2  * difCoeff.x, 0.5);
     BTensor[4] = pow(2 * difCoeff.y, 0.5);

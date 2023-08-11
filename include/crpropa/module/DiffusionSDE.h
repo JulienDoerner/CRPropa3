@@ -103,6 +103,10 @@ public:
 	 @return	  magnetic field vector at the position pos */
 	Vector3d getAdvectionFieldAtPosition(Vector3d pos) const;
 
+	Vector3d getDiffusionTensor(double E, int id = 0, double B = 0){
+		return diffusionTensor -> getTensorDiagonal(E, id, B);
+	};
+
 	void setDebug(bool b) { debug = b;};
 };
 /** @}*/
