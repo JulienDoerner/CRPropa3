@@ -11,6 +11,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <fstream>
 
 namespace crpropa {
 
@@ -112,6 +113,70 @@ void SourceMultipleParticleTypes::setDescription() {
 	for (int i = 0; i < particleTypes.size(); i++)
 		ss << "      ID = " << particleTypes[i] << "\n";
 	description = ss.str();
+}
+
+// ----------------------------------------------------------------------------
+void SourceCylindricalCDF::load_radial(std::string filePath, double scale) {
+	std::ifstream infile(filePath.c_str());
+
+	if (!infile.good())
+		throw std::runtime_error("SourceCylindricalCDF::load_radial: could not open " + filePath);
+	
+	std::string line;
+	double r, cdf;
+	while (std::getline(infile, line)) {
+		if ((line.size() > 0) & (line[0] != '#') ) {
+			std::istringstream iss(line);
+			iss >> r >> cdf;
+			R_pos.push_back(r * scale);
+			R_cdf.push_back(cdf);
+			// std::cout << r << "\t" << cdf << "\n";
+		}
+	}
+	infile.close();
+}
+
+void SourceCylindricalCDF::load_z(std::string filePath, double scale) {
+	std::ifstream infile(filePath.c_str());
+
+	if (!infile.good())
+		throw std::runtime_error("SourceCylindricalCDF::load_z: could not open " + filePath);
+	
+	std::string line;
+	double z, cdf;
+	while (std::getline(infile, line)) {
+		if ((line.size() > 0) & (line[0] != '#') ) {
+			std::istringstream iss(line);
+			iss >> z >> cdf;
+			Z_pos.push_back(z * scale);
+			Z_cdf.push_back(cdf);
+		}
+	}
+	infile.close();
+}
+
+void SourceCylindricalCDF::prepareParticle(ParticleState &ps) const {
+	Random &rand = Random::instance();
+
+	Vector3d pos;
+
+	// choose a random position in a bin 
+	int iR = rand.randBin(R_cdf);
+	double R = rand.rand() * (R_pos[iR] - R_pos[iR -1]) + R_pos[iR - 1];
+
+	double phi = rand.rand() * 2. * M_PI;
+	pos.x = std::cos(phi) * R; 
+	pos.y = std::sin(phi) * R;
+
+	int iZ = rand.randBin(Z_cdf);
+	double z = rand.rand() * (Z_pos[iZ] - Z_pos[iZ -1]) + Z_pos[iZ - 1];
+	pos.z = z; 
+	if(debug) {
+		std::cout << "Radial bin: " << iR << " at position " << R / kpc << "kpc \n";
+		std::cout << "Angle: " << phi / M_PI << " pi leads to x = " << pos.x / kpc << " kpc and y = " << pos.y << " kpc \n";
+		std::cout << "height bin: " << iZ << " at position " << z / kpc << "kpc \n";
+	}
+	ps.setPosition(pos);
 }
 
 // ----------------------------------------------------------------------------

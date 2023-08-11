@@ -126,6 +126,34 @@ public:
 
 
 /**
+ * @class SourceCylindricalCDF
+ * @brief draw a position in a cylindrical source distribution given by cdfs 
+ * 
+ */
+class SourceCylindricalCDF: public SourceFeature {
+private: 
+	std::vector<double> R_pos, Z_pos; // positions of the CDF 
+	std::vector<double> R_cdf, Z_cdf; // CDF for the position
+	bool debug = false;
+public: 
+	void load_radial(std::string path, double scale = kpc);
+	void load_z(std::string path, double scale = kpc);
+
+	void prepareParticle(ParticleState &particle) const;
+	void setDebug(bool b) {debug = b;};
+	void printCDF() {
+		std::cout << "RADIAL: \n";
+		for(int i = 0; i < R_pos.size(); i++)
+			std::cout << "i: " << i << " Rpos: " << R_pos[i] / kpc << " cdf: " << R_cdf[i] << "\n";
+		
+		std::cout << "\n HEIGHT \n";
+		for(int i = 0; i < Z_pos.size(); i++)
+			std::cout << "i: " << i << " Zpos: " << Z_pos[i] / kpc << " cdf: " << Z_cdf[i] << "\n";
+
+	};
+};
+
+/**
  @class SourceEnergy
  @brief Sets the initial energy of the emitted particles to a specific value
 
