@@ -37,11 +37,11 @@ jobs:
         run: |
           cd build
           make install -j
-          cd 
-          export PYTHONPATH="$HOME/.local/"
-          python -c "import crpropa"
       - name: convert notebooks to python 
+        env: 
+          PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
         run: |
+          python -c "import crpropa"
           export runfolder="notebook_run"
           mkdir "$runfolder"
           for file in doc/pages/example_notebooks/*/*.ipynb; do
