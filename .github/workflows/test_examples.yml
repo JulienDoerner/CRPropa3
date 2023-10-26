@@ -32,19 +32,19 @@ jobs:
           mkdir build
           cd build
           cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local -DENABLE_PYTHON=True -DPYTHON_EXECUTABLE=${{ matrix.config.py }} -DENABLE_TESTING=Off -DENABLE_SWIG_BUILTIN=${{ matrix.config.swig_builtin }} -DSIMD_EXTENSIONS=native
-          export PATH=$PATH:/$HOME/.local
+          export PATH=$PATH:$HOME/.local
       - name: Build CRPropa
         run: |
           cd build
           make install -j
           cd 
+          export PYTHONPATH="$HOME/.local/"
           python -c "import crpropa"
       - name: convert notebooks to python 
         run: |
-          cd doc/pages/example_notebooks
           export runfolder="notebook_run"
           mkdir "$runfolder"
-          for file in ./*/*.ipynb; do
+          for file in doc/pages/example_notebooks/*/*.ipynb; do
             if [ -f "$file" ]; then
               jupyter-nbconvert --to python "$file" --output-dir "$runfolder"
             fi
