@@ -754,7 +754,7 @@ TEST(EMPairProduction, secondaries) {
 	std::cout << " / second";
 	fields.push_back(URB);
 	std::cout << " / thrid field to list\n";
-	std::cout << "have in total " fields.size() << "fields\n";
+	std::cout << "have in total " << fields.size() << "fields\n";
 
 	// loop over photon backgrounds
 	for (int f = 0; f < fields.size(); f++) {
