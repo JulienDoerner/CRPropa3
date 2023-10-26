@@ -763,6 +763,8 @@ TEST(EMPairProduction, secondaries) {
 			if (c.isActive())
 				continue;
 			
+			std::cout << "i = " << i << " has an inactive candidate with "  << c.secondaries.size() << "secondaries \n"; 
+			
 			// expect 2 secondaries
 			EXPECT_EQ(c.secondaries.size(), 2);
 
@@ -770,6 +772,7 @@ TEST(EMPairProduction, secondaries) {
 			double Etot = 0;
 			for (int j = 0; j < c.secondaries.size(); j++) {
 				ref_ptr<Candidate> s = c.secondaries[j];
+				std::cout << "\t secondary #" << j << " works \n"; 
 				EXPECT_EQ(abs(s->current.getId()), 11);
 				EXPECT_GT(s->current.getEnergy(), 0);
 				EXPECT_LT(s->current.getEnergy(), Ep);
