@@ -1,4 +1,4 @@
-name: crpropa-testing
+name: crpropa-example-test
 on: [push, pull_request]
 
 jobs:
@@ -31,12 +31,14 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DENABLE_PYTHON=True -DPYTHON_EXECUTABLE=${{ matrix.config.py }} -DENABLE_TESTING=Off -DENABLE_SWIG_BUILTIN=${{ matrix.config.swig_builtin }} -DSIMD_EXTENSIONS=native
+          cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local -DENABLE_PYTHON=True -DPYTHON_EXECUTABLE=${{ matrix.config.py }} -DENABLE_TESTING=Off -DENABLE_SWIG_BUILTIN=${{ matrix.config.swig_builtin }} -DSIMD_EXTENSIONS=native
+          export PATH=$PATH:/$HOME/.local
       - name: Build CRPropa
         run: |
           cd build
-          make -j
-          make install
+          make install -j
+          cd 
+          python -c "import crpropa"
       - name: convert notebooks to python 
         run: |
           cd doc/pages/example_notebooks
