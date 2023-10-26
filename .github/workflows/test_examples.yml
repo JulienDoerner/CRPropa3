@@ -45,7 +45,7 @@ jobs:
           mkdir "$runfolder"
           for file in doc/pages/example_notebooks/*/*.ipynb; do
             if [ -f "$file" ]; then
-              jupyter-nbconvert --to python "$file" --output-dir "$runfolder"
+              jupyter-nbconvert --to python "$file" --output-dir "$runfolder" --RegexRemovePreprocessor.patterns="^%"
             fi
           done
       - name: run all python scripts
