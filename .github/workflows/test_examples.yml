@@ -40,8 +40,8 @@ jobs:
         env: 
           PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
         run: |
-          python -c "from sys import path; print(path)"
-          python -c "import crpropa"
+          python3 -c "from sys import path; print(path)"
+          python3 -c "import crpropa"
           export runfolder="notebook_run"
           mkdir "$runfolder"
           for file in doc/pages/example_notebooks/*/*.ipynb; do
