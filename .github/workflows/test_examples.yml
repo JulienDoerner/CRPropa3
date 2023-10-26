@@ -41,6 +41,7 @@ jobs:
         env: 
           PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
         run: |
+          python -c "from sys import path; for p in path: print(p)"
           python -c "import crpropa"
           export runfolder="notebook_run"
           mkdir "$runfolder"
