@@ -40,14 +40,23 @@ jobs:
       - name: convert notebooks to python 
         env: 
           PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
+          runfolder: "notebook_run"
         run: |
-          python3 -c "from sys import path; print(path)"
-          python3 -c "import crpropa"
-          export runfolder="notebook_run"
           mkdir "$runfolder"
           for file in doc/pages/example_notebooks/*/*.ipynb; do
             if [ -f "$file" ]; then
               jupyter-nbconvert --to python "$file" --output-dir "$runfolder"
             fi
           done
+      - name: run all python scripts
+        env: 
+          PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
+          runfolder: "notebook_run"
+        run: | 
+          cd "$runfolder"
+          for file in ./*.py; do 
+            if [ -f "$file" ]; then
+              python3 "$file"
+            fi
+          done              
           
