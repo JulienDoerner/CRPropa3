@@ -736,21 +736,28 @@ TEST(EMPairProduction, limitNextStep) {
 }
 
 TEST(EMPairProduction, secondaries) {
+	std::cout << "start with the test \n";
 	// Test if secondaries are correctly produced.
 	ref_ptr<PhotonField> CMB_instance = new CMB();
 	ref_ptr<PhotonField> IRB = new IRB_Gilmore12();
 	ref_ptr<PhotonField> URB = new URB_Protheroe96();
+	std::cout << "photon field instances created \n";
 	EMPairProduction m(CMB_instance);
 	m.setHaveElectrons(true);
 	m.setThinning(0.);
 
 	std::vector< ref_ptr<PhotonField> > fields;
+	std::cout << "created photon field list \n add ";
 	fields.push_back(CMB_instance);
+	std::cout << "first";
 	fields.push_back(IRB);
+	std::cout << " / second";
 	fields.push_back(URB);
+	std::cout << " / thrid field to list\n";
 
 	// loop over photon backgrounds
 	for (int f = 0; f < fields.size(); f++) {
+		std::cout << "start loop f = " << f << "\n";
 		m.setPhotonField(fields[f]);
 		for (int i = 0; i < 140; i++) { // loop over energies Ep = (1e10 - 1e23) eV
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
