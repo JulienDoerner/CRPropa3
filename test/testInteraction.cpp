@@ -769,11 +769,11 @@ TEST(EMPairProduction, secondaries) {
 			// expect electron / positron with energies 0 < E < Ephoton
 			double Etot = 0;
 			for (int j = 0; j < c.secondaries.size(); j++) {
-				Candidate s = *c.secondaries[j];
-				EXPECT_EQ(abs(s.current.getId()), 11);
-				EXPECT_GT(s.current.getEnergy(), 0);
-				EXPECT_LT(s.current.getEnergy(), Ep);
-				Etot += s.current.getEnergy();
+				ref_ptr<Candidate> s = c.secondaries[j];
+				EXPECT_EQ(abs(s->current.getId()), 11);
+				EXPECT_GT(s->current.getEnergy(), 0);
+				EXPECT_LT(s->current.getEnergy(), Ep);
+				Etot += s->current.getEnergy();
 			}
 
 			// test energy conservation
