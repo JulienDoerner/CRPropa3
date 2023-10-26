@@ -760,6 +760,7 @@ TEST(EMPairProduction, secondaries) {
 	for (int f = 0; f < fields.size(); f++) {
 		std::cout << "start loop f = " << f << "\n";
 		ref_ptr<PhotonField> field = fields[f];
+		std::cout << "got Photonfield \n";
 		m.setPhotonField(field);
 		for (int i = 0; i < 140; i++) { // loop over energies Ep = (1e10 - 1e23) eV
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
