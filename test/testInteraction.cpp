@@ -770,12 +770,14 @@ TEST(EMPairProduction, secondaries) {
 			//c.setCurrentStep(std::numeric_limits<double>::max());
 			c.setCurrentStep(1e10 * Mpc);
 			m.process(&c);
-			std::cout << "i = " << i << " processed the candidate \n";
+			std::cout << "i = " << i << " processed the candidate. Candidate is now ";
 			// pass if no interaction has occured (no tabulated rates)
-			if (c.isActive())
+			if (c.isActive()) {
+				std::cout << "active\n";
 				continue;
+			}
 			
-			std::cout << "i = " << i << " has an inactive candidate with "  << c.secondaries.size() << "secondaries \n"; 
+			std::cout "inactive and has "  << c.secondaries.size() << "secondaries \n"; 
 			
 			// expect 2 secondaries
 			EXPECT_EQ(c.secondaries.size(), 2);
