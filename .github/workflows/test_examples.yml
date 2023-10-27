@@ -55,7 +55,7 @@ jobs:
         run: | 
           cd "$runfolder"
           python3 -c "from sys import path; print(path)"
-          python3 -c "from crpropa import *"
+          python3 -c "from crpropa import c_light"
           for file in ./*.py; do 
             if [ -f "$file" ]; then
               python3 "$file"
