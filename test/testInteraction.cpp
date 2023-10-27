@@ -777,7 +777,7 @@ TEST(EMPairProduction, secondaries) {
 				continue;
 			}
 			
-			std::cout "inactive and has "  << c.secondaries.size() << "secondaries \n"; 
+			std::cout << "inactive and has "  << c.secondaries.size() << "secondaries \n"; 
 			
 			// expect 2 secondaries
 			EXPECT_EQ(c.secondaries.size(), 2);
