@@ -767,6 +767,8 @@ TEST(EMPairProduction, secondaries) {
 		for (int i = 0; i < 140; i++) { // loop over energies Ep = (1e10 - 1e23) eV
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
 			Candidate c(22, Ep);
+			EXPECT_TRUE(c.isActive()); // new candidate is always active
+
 			//c.setCurrentStep(std::numeric_limits<double>::max());
 			c.setCurrentStep(1e10 * Mpc);
 			m.process(&c);
@@ -795,6 +797,7 @@ TEST(EMPairProduction, secondaries) {
 
 			// test energy conservation
 			EXPECT_DOUBLE_EQ(Ep, Etot);
+			delete c;
 		}
 	}
 }

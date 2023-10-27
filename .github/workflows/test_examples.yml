@@ -39,11 +39,13 @@ jobs:
           make install -j
       - name: convert notebooks to python 
         env: 
-          PYTHONPATH: "$/home/runner/.local/lib/python3.8/site-packages/"
-          runfolder: "notebook_run"
+          PYTHONPATH: "/home/runner/.local/lib/python3.8/site-packages/"
+          runfolder: "/home/runner/notebook_run"
         run: |
           mkdir "$runfolder"
-          for file in ./*/*.ipynb; do
+          cd doc/pages/example_notebooks/
+          for file in */*.ipynb; do
+            echo "$file"
             if [ -f "$file" ]; then
               f=(${file//// })
               f=${f[1]}
