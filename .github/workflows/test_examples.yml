@@ -58,7 +58,7 @@ jobs:
       - name: run all python scripts
         env: 
           PYTHONPATH: "$/home/runner/.local/lib/python3.8/site-packages/"
-          runfolder: "notebook_run"
+          runfolder: "/home/runner/notebook_run"
         run: | 
           cd "$runfolder"
           ls
