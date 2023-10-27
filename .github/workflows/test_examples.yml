@@ -39,7 +39,7 @@ jobs:
           make install -j
       - name: convert notebooks to python 
         env: 
-          PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
+          PYTHONPATH: "$/home/runner/.local/lib/python3.8/site-packages/"
           runfolder: "notebook_run"
         run: |
           mkdir "$runfolder"
@@ -50,7 +50,7 @@ jobs:
           done
       - name: run all python scripts
         env: 
-          PYTHONPATH: "$HOME/.local/lib/python3.8/site-packages/"
+          PYTHONPATH: "$/home/runner/.local/lib/python3.8/site-packages/"
           runfolder: "notebook_run"
         run: | 
           cd "$runfolder"
