@@ -54,7 +54,7 @@ jobs:
           runfolder: "notebook_run"
         run: | 
           cd "$runfolder"
-          python3 -c "from sysimport path; print(path)"
+          python3 -c "from sys import path; print(path)"
           python3 -c "from crpropa import *"
           for file in ./*.py; do 
             if [ -f "$file" ]; then
