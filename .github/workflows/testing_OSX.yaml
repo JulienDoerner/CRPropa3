@@ -29,7 +29,7 @@ jobs:
        run: |
         mkdir build
         cd build
-        cmake .. -DENABLE_PYTHON=False -DENABLE_TESTING=On -DSIMD_EXTENSIONS=avx -D -DENABLE_HDF5=OFF -DENABLE_GALACTICMAGETICLENS=OFF
+        cmake .. -DENABLE_PYTHON=False -DENABLE_TESTING=On -DSIMD_EXTENSIONS=avx -DENABLE_HDF5=OFF -DENABLE_GALACTICMAGETICLENS=OFF
      - name: Build CRPropa
        run: |
          cd build
