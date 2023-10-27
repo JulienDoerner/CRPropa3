@@ -48,6 +48,8 @@ jobs:
               f=(${file//// })
               f=${f[1]}
               f=(${f//./})
+              finalFile="$runfolder"/"$f".py
+              echo "convert notebook $file to script $finalFile"
               jupyter nbconvert --to python "$file" --stdout | grep -v -e "^get_ipython" > "$runfolder"/"$f".py
             fi
           done
@@ -57,9 +59,8 @@ jobs:
           runfolder: "notebook_run"
         run: | 
           cd "$runfolder"
-          python3 -c "from sys import path; print(path)"
-          python3 -c "from crpropa import c_light"
-          for file in ./*.py; do 
+          ls
+          for file in *.py; do 
             if [ -f "$file" ]; then
               python3 "$file"
             fi
