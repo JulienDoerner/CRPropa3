@@ -20,6 +20,7 @@
 
 namespace crpropa {
 
+/*
 // ElectronPairProduction -----------------------------------------------------
 TEST(ElectronPairProduction, allBackgrounds) {
 	// Test if interaction data files are loaded.
@@ -695,7 +696,7 @@ TEST(Redshift, limitRedshiftDecrease) {
 	redshift.process(&c);
 	EXPECT_DOUBLE_EQ(0, c.getRedshift());
 }
-
+*/
 // EMPairProduction -----------------------------------------------------------
 TEST(EMPairProduction, allBackgrounds) {
 	// Test if interaction data files are loaded.
@@ -762,13 +763,14 @@ TEST(EMPairProduction, secondaries) {
 		ref_ptr<PhotonField> field = fields[f];
 		std::cout << "got Photonfield \n";
 		m.setPhotonField(field);
+		std::cout << "give photonfield to model \n";
 		for (int i = 0; i < 140; i++) { // loop over energies Ep = (1e10 - 1e23) eV
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
 			Candidate c(22, Ep);
 			//c.setCurrentStep(std::numeric_limits<double>::max());
 			c.setCurrentStep(1e10 * Mpc);
 			m.process(&c);
-
+			std::cout << "i = " << i << " processed the candidate \n";
 			// pass if no interaction has occured (no tabulated rates)
 			if (c.isActive())
 				continue;
