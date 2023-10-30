@@ -62,8 +62,19 @@ jobs:
           runfolder: "/home/runner/notebook_run"
         run: | 
           cd "$runfolder"
+          export skipping_nb=" # this notebooks are skipped due to external dependencies
+            mhd_modelsipynb.py 
+            custom-photon-fieldipynb.py" 
+          function no-skip() {
+            for f in (${skipping_nb// / }); do 
+              if [ "$f" == "$1"]; then
+                return 1
+              fi
+            done
+            return 0
+          }
           for file in *.py; do 
-            if [ -f "$file" ]; then
+            if [ -f "$file" ] && [ no-skip "$file" == 0]; then
               echo "run file $file"
               python3 "$file"
             fi
