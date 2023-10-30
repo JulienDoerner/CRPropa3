@@ -22,8 +22,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libmuparser-dev python3-dev python-dev python3-numpy python-numpy python3-setuptools python-setuptools libhdf5-serial-dev libomp5 libomp-dev libfftw3-dev libcfitsio-dev lcov
-          pip3 install jupyter
+          pip3 install -r doc/pages/example_notebooks/requirements.txt # load requrements for notebooks
           pip3 install --upgrade Pygments
+          pip3 install --upgrade numpy
       - name: Set up the build
         env:
           CXX: ${{ matrix.config.cxx }}
@@ -58,7 +59,7 @@ jobs:
       - name: run all python scripts
         env: 
           PYTHONPATH: "$/home/runner/.local/lib/python3.8/site-packages/"
-          runfolder: "notebook_run"
+          runfolder: "/home/runner/notebook_run"
         run: | 
           cd "$runfolder"
           for file in *.py; do 

@@ -784,6 +784,8 @@ TEST(EMPairProduction, secondaries) {
 			// expect 2 secondaries
 			EXPECT_EQ(c.secondaries.size(), 2);
 
+			std::cout << "no. of secondaries is " << c.secondaries.size() << "\n";
+
 			// expect electron / positron with energies 0 < E < Ephoton
 			double Etot = 0;
 			for (int j = 0; j < c.secondaries.size(); j++) {
@@ -797,7 +799,6 @@ TEST(EMPairProduction, secondaries) {
 
 			// test energy conservation
 			EXPECT_DOUBLE_EQ(Ep, Etot);
-			delete c;
 		}
 	}
 }
