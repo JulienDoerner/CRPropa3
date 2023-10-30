@@ -61,9 +61,9 @@ jobs:
           runfolder: "notebook_run"
         run: | 
           cd "$runfolder"
-          ls
           for file in *.py; do 
             if [ -f "$file" ]; then
+              echo "run file $file"
               python3 "$file"
             fi
           done              
