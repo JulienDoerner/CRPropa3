@@ -62,21 +62,15 @@ jobs:
           runfolder: "/home/runner/notebook_run"
         run: | 
           cd "$runfolder"
-          export skipping_nb=" # this notebooks are skipped due to external dependencies
-            mhd_modelsipynb.py 
-            custom-photon-fieldipynb.py" 
-          function no-skip() {
-            for f in (${skipping_nb// / }); do 
-              if [ "$f" == "$1"]; then
-                return 1
-              fi
-            done
+          function skip() { # this notebooks have external dependencies and can not be tested
+            if [ "$1" = "custom-photon-fieldipynb.py" ] || [ "$1" = "MHD_modelsipynb.py" ] || [ "$1" = "density_grid_samplingipynb.py" ]; then
+              return 1
+            fi
             return 0
           }
-          for file in *.py; do 
-            if [ -f "$file" ] && [ no-skip "$file" == 0]; then
-              echo "run file $file"
-              python3 "$file"
-            fi
-          done              
-          
+          for file in *.py; do
+              skip "$file"
+              if [ $? -eq 0 ]; then
+                  python3 "$file"
+              fi
+          done
