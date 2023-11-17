@@ -50,13 +50,14 @@ void PropagationCK::tryStep(const Y &y, Y &out, Y &error, double h,
 
 PropagationCK::Y PropagationCK::dYdt(const Y &y, ParticleState &p, double z) const {
 	// normalize direction vector to prevent numerical losses
-	Vector3d velocity = y.u.getUnitVector() * c_light;
+	double v = p.getAbsolutVelocity();
+	Vector3d velocity = y.u.getUnitVector() * v; //real velocity 0<v<c
 	
 	// get B field at particle position
 	Vector3d B = getFieldAtPosition(y.x, z);
 
-	// Lorentz force: du/dt = q*c/E * (v x B)
-	Vector3d dudt = p.getCharge() * c_light / p.getEnergy() * velocity.cross(B);
+	// Lorentz force: du/dt = q / mv * (v x B)
+	Vector3d dudt = p.getCharge() / (p.getLorentzFactor() * p.getMass() * v) * velocity.cross(B);
 	return Y(velocity, dudt);
 }
 
