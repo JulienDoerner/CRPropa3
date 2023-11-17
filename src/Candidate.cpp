@@ -7,7 +7,7 @@
 namespace crpropa {
 
 Candidate::Candidate(int id, double E, Vector3d pos, Vector3d dir, double z, double weight) :
-		redshift(z), trajectoryLength(0), weight(1), currentStep(0), nextStep(0), active(true), parent(0) {
+		redshift(z), trajectoryLength(0), weight(1), currentStep(0), nextStep(0), active(true), parent(0), time(0) {
 	ParticleState state(id, E, pos, dir);
 	source = state;
 	created = state;
@@ -27,7 +27,7 @@ Candidate::Candidate(int id, double E, Vector3d pos, Vector3d dir, double z, dou
 }
 
 Candidate::Candidate(const ParticleState &state) :
-		source(state), created(state), current(state), previous(state), redshift(0), trajectoryLength(0), currentStep(0), nextStep(0), active(true), parent(0) {
+		source(state), created(state), current(state), previous(state), redshift(0), trajectoryLength(0), currentStep(0), nextStep(0), active(true), parent(0), time(0) {
 
 #if defined(OPENMP_3_1)
 		#pragma omp atomic capture
@@ -57,6 +57,10 @@ double Candidate::getTrajectoryLength() const {
 	return trajectoryLength;
 }
 
+double Candidate::getTime() const {
+	return time;
+}
+
 double Candidate::getWeight() const {
 	return weight;
 }
@@ -77,6 +81,10 @@ void Candidate::setTrajectoryLength(double a) {
 	trajectoryLength = a;
 }
 
+void Candidate::setTime(double t) {
+	time = t;
+}
+
 void Candidate::setWeight(double w) {
 	weight = w;
 }
@@ -84,6 +92,7 @@ void Candidate::setWeight(double w) {
 void Candidate::setCurrentStep(double lstep) {
 	currentStep = lstep;
 	trajectoryLength += lstep;
+	time += lstep / c_light; // adjust for v < c
 }
 
 void Candidate::setNextStep(double step) {
@@ -128,6 +137,7 @@ void Candidate::addSecondary(int id, double energy, double weight) {
 	ref_ptr<Candidate> secondary = new Candidate;
 	secondary->setRedshift(redshift);
 	secondary->setTrajectoryLength(trajectoryLength);
+	secondary->setTime(time);
 	secondary->setWeight(weight);
 	secondary->source = source;
 	secondary->previous = previous;
@@ -142,7 +152,9 @@ void Candidate::addSecondary(int id, double energy, double weight) {
 void Candidate::addSecondary(int id, double energy, Vector3d position, double weight) {
 	ref_ptr<Candidate> secondary = new Candidate;
 	secondary->setRedshift(redshift);
-	secondary->setTrajectoryLength(trajectoryLength - (current.getPosition() - position).getR() );
+	double dR = (current.getPosition() - position).getR();
+	secondary->setTrajectoryLength(trajectoryLength - dR);
+	secondary->setTime(time - dR / c_light); // adjust for v < c
 	secondary->setWeight(weight);
 	secondary->source = source;
 	secondary->previous = previous;
@@ -180,6 +192,7 @@ ref_ptr<Candidate> Candidate::clone(bool recursive) const {
 	cloned->redshift = redshift;
 	cloned->weight = weight;
 	cloned->trajectoryLength = trajectoryLength;
+	cloned->time = time;
 	cloned->currentStep = currentStep;
 	cloned->nextStep = nextStep;
 	if (recursive) {
@@ -228,6 +241,7 @@ uint64_t Candidate::nextSerialNumber = 0;
 void Candidate::restart() {
 	setActive(true);
 	setTrajectoryLength(0);
+	setTime(0);
 	previous = source;
 	current = source;
 }

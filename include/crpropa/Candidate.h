@@ -44,6 +44,7 @@ private:
 	double weight; /**< Weight of the candidate */
 	double redshift; /**< Current simulation time-point in terms of redshift z */
 	double trajectoryLength; /**< Comoving distance [m] the candidate has traveled so far */
+	double time; /**< Current simulation time in [s] */
 	double currentStep; /**< Size of the currently performed step in [m] comoving units */
 	double nextStep; /**< Proposed size of the next propagation step in [m] comoving units */
 
@@ -71,6 +72,12 @@ public:
 
 	void setTrajectoryLength(double length);
 	double getTrajectoryLength() const;
+
+	/**
+	 Set the total time.
+	*/
+	void setTime(double time);
+	double getTime() const;
 
 	void setRedshift(double z);
 	double getRedshift() const;
