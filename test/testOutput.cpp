@@ -99,13 +99,14 @@ TEST(TextOutput, printHeader_Custom) {
 	output.enable(Output::SerialNumberColumn);
 	output.disable(Output::TrajectoryLengthColumn);
 	output.set(Output::RedshiftColumn, false);
+	output.enable(Output::CandidateTagColumn);
 
 	::testing::internal::CaptureStdout();
 	output.process(&c);
 	std::string captured = testing::internal::GetCapturedStdout();
 
 	EXPECT_EQ(captured.substr(0, captured.find("\n")),
-	          "#\tSN\tID\tE\tSN0\tID0\tE0\tSN1");
+	          "#\tSN\tID\tE\tSN0\tID0\tE0\tSN1\ttag");
 }
 
 TEST(TextOutput, printProperty) {
@@ -229,7 +230,7 @@ TEST(ParticleCollector, getTrajectory) {
 	sim->add(new SimplePropagation(1, 1));
 
 	ref_ptr<Observer> obs = new Observer();
-	obs->add(new ObserverPoint());
+	obs->add(new Observer1D());
 	obs->onDetection(output);
 	sim->add(obs);
 

@@ -19,18 +19,18 @@ namespace crpropa {
  @brief Defines the energy spectrum of simple power-law turbulence
  */
 class SimpleTurbulenceSpectrum : public TurbulenceSpectrum {
+	const int constScaleBendover = 1000; 	// define the bandover scale as 1000 * lMax to ensure k * lBendover >> 1. The bendover scale is necessary for the implementation of PlaneWaveTurbulence. 
   public:
 	/**
-	 @param Brms         root mean square field strength for generated field
-	 @param lMin	 Minimum physical scale of the turbulence
-	 @param lMax	 Maximum physical scale of the turbulence
-	 @param lBendover	   the bend-over scale
-	 @param sindex	 Spectral index of the energy spectrum in the inertial
-	 range
+	 * The bend-over scale is set to 1000 times lMax to ensure to be in the inertial range. This should not be changed.
+	 @param Brms		Root mean square field strength for generated field
+	 @param lMin	 	Minimum physical scale of the turbulence
+	 @param lMax	 	Maximum physical scale of the turbulence
+	 @param sIndex	 	Spectral index of the energy spectrum in the inertial range
 	*/
 	SimpleTurbulenceSpectrum(double Brms, double lMin, double lMax,
 	                         double sIndex = 5. / 3)
-	    : TurbulenceSpectrum(Brms, lMin, lMax, 0, sIndex, 0) {}
+	    : TurbulenceSpectrum(Brms, lMin, lMax, constScaleBendover * lMax, sIndex, 0) {}
 	~SimpleTurbulenceSpectrum() {}
 
 	/**
@@ -92,6 +92,7 @@ inline double turbulentCorrelationLength(double lMin, double lMax,
 
 /**
  Create a random initialization of a turbulent field.
+ @param grid	grid on which the turbulence is calculated
  @param lMin	Minimum wavelength of the turbulence
  @param lMax	Maximum wavelength of the turbulence
  @param alpha	Power law index of <B^2(k)> ~ k^alpha (alpha = -11/3 corresponds

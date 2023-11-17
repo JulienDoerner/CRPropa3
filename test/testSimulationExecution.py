@@ -37,12 +37,15 @@ class test1DChainWithSecondaries(unittest.TestCase):
         sim.add(crp.NuclearDecay())
         sim.add(crp.ElectronPairProduction(CMB))
         sim.add(crp.ElectronPairProduction(IRB))
+        sim.add(crp.EMPairProduction(CMB))
+        sim.add(crp.EMPairProduction(IRB))
+        sim.add(crp.EMInverseComptonScattering(CMB))
+        sim.add(crp.EMInverseComptonScattering(IRB))
         sim.add(crp.MinimumEnergy(1 * crp.EeV))
-        sim.add(crp.EMCascade())
 
         # observer
         obs = crp.Observer()
-        obs.add(crp.ObserverPoint())
+        obs.add(crp.Observer1D())
         sim.add(obs)
 
         # output

@@ -8,7 +8,7 @@ else(APPLE)
 endif(APPLE)
 
 project(CRPropa Fortran C CXX)
-set(CRPROPA_RELEASE_VERSION >3.1.7)  # Update for new release
+set(CRPROPA_RELEASE_VERSION 3.2+)  # Update for new release
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -118,7 +118,7 @@ if(ENABLE_COVERAGE)
   find_program(LCOV_PATH lcov)
   find_program(GENHTML_PATH genhtml)
   if(LCOV_PATH AND GENHTML_PATH)
-    message("Enabling coverage report via $make coverage")
+    message("Enabling coverage report via $make test && make coverage")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
     list(APPEND CRPROPA_EXTRA_LIBRARIES "-lgcov")
     list(APPEND CRPROPA_EXTRA_LIBRARIES "-fprofile-arcs")
@@ -163,16 +163,6 @@ list(APPEND CRPROPA_EXTRA_INCLUDES libs/HepPID/include)
 add_subdirectory(libs/sophia)
 list(APPEND CRPROPA_EXTRA_LIBRARIES sophia gfortran)
 list(APPEND CRPROPA_EXTRA_INCLUDES libs/sophia)
-
-# DINT (provided)
-add_subdirectory(libs/dint)
-list(APPEND CRPROPA_EXTRA_LIBRARIES dint)
-list(APPEND CRPROPA_EXTRA_INCLUDES libs/dint/include)
-
-# EleCa (provided)
-add_subdirectory(libs/EleCa)
-list(APPEND CRPROPA_EXTRA_LIBRARIES eleca)
-list(APPEND CRPROPA_EXTRA_INCLUDES libs/EleCa/include)
 
 # GlacticMagneticLenses
 option(ENABLE_GALACTICMAGETICLENS "Galactic Magnetic Lens" ON)
@@ -242,7 +232,7 @@ if(FFTW3F_FOUND)
 endif(FFTW3F_FOUND)
 
 # Quimby (optional for SPH magnetic fields)
-option(ENABLE_QUIMBY "Quimby Support" ON)
+option(ENABLE_QUIMBY "Quimby Support" OFF)
 if(ENABLE_QUIMBY)
   find_package(Quimby)
   if(QUIMBY_FOUND)
@@ -336,16 +326,18 @@ endif(APPLE)
 # Download data files (interaction data, masses, decay data ...)
 # ----------------------------------------------------------------------------
 OPTION(DOWNLOAD_DATA "Download CRPropa data files" ON)
-set(CRPROPA_DATAFILE_VER "2021-11-29")
+set(CRPROPA_DATAFILE_VER "2023-10-20")
 if(DOWNLOAD_DATA)
-  message("-- Downloading data file from crpropa.desy.de ~ 65 MB")
+  message("-- Downloading data files from sciebo ~ 73 MB")
   file(DOWNLOAD
-    https://www.desy.de/~crpropa/data/interaction_data/data-${CRPROPA_DATAFILE_VER}.tar.gz-CHECKSUM
-    ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz-CHECKSUM)
+  https://ruhr-uni-bochum.sciebo.de/public.php/webdav/data-${CRPROPA_DATAFILE_VER}.tar.gz-CHECKSUM
+    ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz-CHECKSUM 
+    USERPWD "3juW9sntQX2IWBS")
   file(STRINGS ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz-CHECKSUM DATA_CHECKSUM LIMIT_COUNT 1 LENGTH_MINIMUM 32 LENGTH_MAXIMUM 32)
   file(DOWNLOAD
-    https://www.desy.de/~crpropa/data/interaction_data/data-${CRPROPA_DATAFILE_VER}.tar.gz
+  https://ruhr-uni-bochum.sciebo.de/public.php/webdav/data-${CRPROPA_DATAFILE_VER}.tar.gz
     ${CMAKE_BINARY_DIR}/data-${CRPROPA_DATAFILE_VER}.tar.gz
+    USERPWD "3juW9sntQX2IWBS"
     EXPECTED_MD5 "${DATA_CHECKSUM}")
   message("-- Extracting data file")
 else()
@@ -381,7 +373,6 @@ add_library(crpropa SHARED
   src/ParticleMass.cpp
   src/ParticleState.cpp
   src/PhotonBackground.cpp
-  src/PhotonPropagation.cpp
   src/ProgressBar.cpp
   src/Random.cpp
   src/Source.cpp
@@ -390,8 +381,8 @@ add_library(crpropa SHARED
   src/module/Acceleration.cpp
   src/module/Boundary.cpp
   src/module/BreakCondition.cpp
+  src/module/CandidateSplitting.cpp
   src/module/DiffusionSDE.cpp
-  src/module/EMCascade.cpp
   src/module/EMDoublePairProduction.cpp
   src/module/EMInverseComptonScattering.cpp
   src/module/EMPairProduction.cpp
@@ -399,6 +390,7 @@ add_library(crpropa SHARED
   src/module/ElasticScattering.cpp
   src/module/ElectronPairProduction.cpp
   src/module/HDF5Output.cpp
+  src/module/MomentumDiffusion.cpp
   src/module/NuclearDecay.cpp
   src/module/Observer.cpp
   src/module/Output.cpp
@@ -406,7 +398,6 @@ add_library(crpropa SHARED
   src/module/ParticleCollector.cpp
   src/module/PhotoDisintegration.cpp
   src/module/PhotoPionProduction.cpp
-  src/module/PhotonEleCa.cpp
   src/module/PhotonOutput1D.cpp
   src/module/PropagationBP.cpp
   src/module/PropagationCK.cpp
@@ -624,10 +615,6 @@ if(ENABLE_TESTING)
   target_link_libraries(testDensity crpropa gtest gtest_main pthread ${COVERAGE_LIBS})
   add_test(testDensity testDensity)
 
-  add_executable(testDINT test/testDINT.cpp)
-  target_link_libraries(testDINT crpropa gtest gtest_main pthread ${COVERAGE_LIBS})
-  add_test(testDINT testDINT)
-
   add_executable(testPropagation test/testPropagation.cpp)
   target_link_libraries(testPropagation crpropa gtest gtest_main pthread ${COVERAGE_LIBS})
   add_test(testPropagation testPropagation)
@@ -656,6 +643,9 @@ if(ENABLE_TESTING)
   target_link_libraries(testAdiabaticCooling crpropa gtest gtest_main pthread ${COVERAGE_LIBS})
   add_test(testAdiabaticCooling testAdiabaticCooling)
 
+  add_executable(testCandidateSplitting test/testCandidateSplitting.cpp)
+  target_link_libraries(testCandidateSplitting crpropa gtest gtest_main pthread ${COVERAGE_LIBS})
+  add_test(testCandidateSplitting testCandidateSplitting)
 
   if(WITH_GALACTIC_LENSES)
     add_executable(testGalacticMagneticLens test/testMagneticLens.cpp)
@@ -675,6 +665,9 @@ if(ENABLE_TESTING)
 
     CONFIGURE_FILE(test/testDiffusionSDE.py testDiffusionSDE.py COPYONLY)
     add_test(testDiffusionSDE ${PYTHON_EXECUTABLE} testDiffusionSDE.py)
+
+    CONFIGURE_FILE(test/testMomentumDiffusion.py testMomentumDiffusion.py COPYONLY)
+    add_test(testMomentumDiffusion ${PYTHON_EXECUTABLE} testMomentumDiffusion.py)
 
     CONFIGURE_FILE(test/testPythonExtension.py testPythonExtension.py COPYONLY)
     add_test(testPythonExtension ${PYTHON_EXECUTABLE} testPythonExtension.py)

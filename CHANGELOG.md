@@ -1,23 +1,72 @@
-## CRPropa vNEXT
+## CRPropa vNext
+
+### Bug fixes:
+* Re-added ToroidalHaloField and LogarithmicSpiralField models. Note, that the class name was also corrected in spelling: TorroidalHaloField --> ToroidalHaloField
+* Synchronized signature of ParticleSplitting constructor
+
+### New features:
+* New candidate property tagOrigin to trace back which source or which interaction created the candidate
+* New interface for massdistributions given on a Grid1f
+* Grids can be restricted to the volume without repetition (clipVolume parameter)
+* SourceFeature to sample the source position from a given massdistribution
+* EBL model from Saldana-Lopez et al. 2021
+* New module CandidateSplitting for better statistics at high energies for e.g. diffusive shock acceleration
+* New advection fields for modeling diffusive shock acceleration at 1D planar, oblique and spherical shocks
+
+### Interface changes:
+* Weight column in hdf-Output is now called "W", which is the same as for TextOutput.
+
+### Features that are deprecated and will be removed after this release
+* ObserverPoint will be renamed into Observer1D.
+* AMRMagenticField - underlying library (saga) is no longer supported.
+
+### Removed features 
+* External extensions DINT and Eleca, which can be replaced with the 
+  EM*-modules combined with the thinning option for reasonable computation
+  times.
+
+### New plugins and resources linked on the webpages:
+* FieldlineIntegrator
+* grplinst
+* monopole
+* ROOTOutputPlugin
+  
+
+## CRPropa 3.2
 
 ### Bug fixes:
 * Fix of reflective boundary condition for scalar- and vectorgrids
   that showed asymmetry and discontinuities (See issue [#361]).
-  
+* Fix in EMTripletPairProduction
+* Fix of the data files of the Hackstein EGMF models as well as the 
+  corresponding example notebook.
+* Fix of axis normalization of getRotated in Vector3.h.
+* Fix of secondary spectra in electromagnetic interactions
+  (EM*-modules), issue [#334] and pull request [#15] in crpropa-data.
+* Fix weight inheritance for secondary particles; they are created with 
+  their parents weights as intial weights now.
 
 ### New features:
 * Add modules for first and second order Fermi acceleration
 * Make custom photon fields available in the PhotoPionProduction module.
-* Add tricubic- and nearest neighbour interpolation routines for scalar- and vectorgrids.
-* Add the new PolarizedSingleModeMagneticField class for polarized/helical single mode magnetic field models.
-* Add a source feature for targeted emission, following the von-Mises-Fisher distribution 
+* Add tricubic- and nearest neighbour interpolation routines for scalar-
+  and vectorgrids.
+* Add the new PolarizedSingleModeMagneticField class for polarized/
+  helical single mode magnetic field models.
+* Add a source feature for targeted emission, following the 
+  von-Mises-Fisher distribution
+* Updates in SNR and pulsar source distributions 
 
 ### Interface changes:
+* Plane wave and grid turbulence models use same parameter convention now 
 
 ### Features that are deprecated and will be removed after this release
+* External extensions DINT and Eleca, which can be replaced with the 
+  EM*-modules combined with the thinning option for reasonable computation
+  times.
 
 ### New plugins and resources linked on the webpages:
-
+* Updated version of the CLUES EGMF models
 
 
 ## CRPropa 3.1.7
