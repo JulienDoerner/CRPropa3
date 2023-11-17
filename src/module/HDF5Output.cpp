@@ -106,6 +106,8 @@ void HDF5Output::open(const std::string& filename) {
 	sid = H5Tcreate(H5T_COMPOUND, sizeof(OutputRow));
 	if (fields.test(TrajectoryLengthColumn))
 		H5Tinsert(sid, "D", HOFFSET(OutputRow, D), H5T_NATIVE_DOUBLE);
+	if (fields.test(TimeColumn))
+		H5Tinsert(sid, "T", HOFFSET(OutputRow, T), H5T_NATIVE_DOUBLE);
 	if (fields.test(RedshiftColumn))
 		H5Tinsert(sid, "z", HOFFSET(OutputRow, z), H5T_NATIVE_DOUBLE);
 	if (fields.test(SerialNumberColumn))
@@ -205,6 +207,7 @@ void HDF5Output::open(const std::string& filename) {
 	insertStringAttribute("Version", g_GIT_DESC);
 	insertDoubleAttribute("LengthScale", this->lengthScale);
 	insertDoubleAttribute("EnergyScale", this->energyScale);
+	insertDoubleAttribute("TimeScale", this->timeScale);
 
 	// add ranom seeds
 	std::vector< std::vector<uint32_t> > seeds = Random::getSeedThreads();
@@ -258,6 +261,7 @@ void HDF5Output::process(Candidate* candidate) const {
 
 	OutputRow r;
 	r.D = candidate->getTrajectoryLength() / lengthScale;
+	r.T = candidate->getTime() / timeScale;
 	r.z = candidate->getRedshift();
 
 	r.SN = candidate->getSerialNumber();

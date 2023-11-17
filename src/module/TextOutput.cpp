@@ -54,6 +54,8 @@ void TextOutput::printHeader() const {
 	*out << "#";
 	if (fields.test(TrajectoryLengthColumn))
 		*out << "\tD";
+	if (fields.test(TimeColumn)) 
+		*out << "\tT";
 	if (fields.test(RedshiftColumn))
 		*out << "\tz";
 	if (fields.test(SerialNumberColumn))
@@ -106,6 +108,8 @@ void TextOutput::printHeader() const {
 	if (fields.test(TrajectoryLengthColumn))
 		*out << "# D             Trajectory length [" << lengthScale / Mpc
 				<< " Mpc]\n";
+	if (fields.test(TimeColumn))
+		*out << "# T             Time [" << timeScale / Gyr << " Gyr] \n";
 	if (fields.test(RedshiftColumn))
 		*out << "# z             Redshift\n";
 	if (fields.test(SerialNumberColumn))
@@ -169,6 +173,10 @@ void TextOutput::process(Candidate *c) const {
 		p += std::sprintf(buffer + p, "%8.5E\t",
 				c->getTrajectoryLength() / lengthScale);
 
+	if (fields.test(TimeColumn)) 
+		p += std::sprintf(buffer + p, "%8.5E\t", 
+				c->getTime() / timeScale);
+
 	if (fields.test(RedshiftColumn))
 		p += std::sprintf(buffer + p, "%1.5E\t", c->getRedshift());
 
@@ -221,7 +229,6 @@ void TextOutput::process(Candidate *c) const {
 			p += std::sprintf(buffer + p, "%8.5E\t%8.5E\t%8.5E\t", pos.x, pos.y,
 					pos.z);
 		}
-
 	}
 
 	if (fields.test(SerialNumberColumn))
@@ -289,6 +296,7 @@ void TextOutput::load(const std::string &filename, ParticleCollector *collector)
 	
 	double lengthScale = Mpc; // default Mpc
 	double energyScale = EeV; // default EeV
+	double timeScale = Gyr; // default Gyr
 
 	if (!infile.good())
 		throw std::runtime_error("crpropa::TextOutput: could not open file " + filename);
@@ -312,6 +320,8 @@ void TextOutput::load(const std::string &filename, ParticleCollector *collector)
 		double x, y, z;
 		stream >> val_d;
 		c->setTrajectoryLength(val_d*lengthScale); // D
+		stream >> val_d;
+		c->setTime(val_d * timeScale); // T
 		stream >> val_d;
 		c->setRedshift(val_d); // z
 		stream >> val_i;

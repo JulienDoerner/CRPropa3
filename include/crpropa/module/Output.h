@@ -24,6 +24,7 @@ namespace crpropa {
  or as columns (in a HDF5 file). The right columns are the names of each
  column for internal access.
  . D			 TrajectoryLengthColumn
+ . T			 TimeColumn
  . SN			 SerialNumberColumn
  . ID			 CurrentIdColumn
  . E			 CurrentEnergyColumn
@@ -53,7 +54,7 @@ namespace crpropa {
  */
 class Output: public Module {
 protected:
-	double lengthScale, energyScale;
+	double lengthScale, energyScale, timeScale;
 	std::bitset<64> fields;
 
 	struct Property
@@ -72,6 +73,7 @@ protected:
 public:
 	enum OutputColumn {
 		TrajectoryLengthColumn,
+		TimeColumn,
 		ColumnDensityColumn,
 		RedshiftColumn,
 		CurrentIdColumn,
@@ -124,6 +126,10 @@ public:
 	/** Set type of output.
 	 @param outputType	type of output: Trajectory1D, Trajectory3D, Event1D, Event3D, Everything
 	 */
+	/** Set time scale
+	 @param scale   time scale (scale = 1 corresponds to 1 sec)
+	 */
+	void setTimeScale(double scale);
 	void setOutputType(OutputType outputType);
 	/** Determines whether a given column will be displayed in the output.
 	 @param field	name of the field to be added/removed from output

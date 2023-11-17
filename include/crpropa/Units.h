@@ -121,16 +121,26 @@ static const double centimeter = 0.01 * meter;
 static const double km = kilometer;
 static const double cm = centimeter;
 
-// second
+// time
 static const double nanosecond = 1e-9 * second;
 static const double microsecond = 1e-6 * second;
 static const double millisecond = 1e-3 * second;
 static const double minute = 60 * second;
 static const double hour = 3600 * second;
+static const double day = 24 * hour;
+static const double year = 365.25 * day;
+static const double kiloyear = 1e3 * year; 
+static const double megayear = 1e6 * year; 
+static const double gigayear = 1e9 * year;
+
 static const double ns = nanosecond;
 static const double mus = microsecond;
 static const double ms = millisecond;
 static const double sec = second;
+static const double yr = year;
+static const double kyr = kiloyear;
+static const double Myr = megayear;
+static const double Gyr = gigayear;
 
 // volume
 static const double ccm = cm*cm*cm;
