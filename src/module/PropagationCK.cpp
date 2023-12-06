@@ -56,8 +56,8 @@ PropagationCK::Y PropagationCK::dYdt(const Y &y, ParticleState &p, double z) con
 	// get B field at particle position
 	Vector3d B = getFieldAtPosition(y.x, z);
 
-	// Lorentz force: du/dt = q / mv * (v x B)
-	Vector3d dudt = p.getCharge() / (p.getLorentzFactor() * p.getMass() * v) * velocity.cross(B);
+	// Lorentz force: du/dt = qc2 / E * (v x B) / v
+	Vector3d dudt = p.getCharge() * c_squared / ((p.getEnergy() + p.getMass() * c_squared)) * velocity.cross(B) / v;
 	return Y(velocity, dudt);
 }
 
@@ -96,11 +96,13 @@ void PropagationCK::process(Candidate *candidate) const {
 	double newStep = step;
 	double z = candidate->getRedshift();
 
+	// try step with step / v instead of step / c_light
+	double v = current.getAbsolutVelocity();
 
 	// if minStep is the same as maxStep the adaptive algorithm with its error
 	// estimation is not needed and the computation time can be saved:
 	if (minStep == maxStep){
-		tryStep(yIn, yOut, yErr, step / c_light, current, z);
+		tryStep(yIn, yOut, yErr, step / v, current, z);
 	} else {
 		step = clip(candidate->getNextStep(), minStep, maxStep);
 		newStep = step;
@@ -108,7 +110,7 @@ void PropagationCK::process(Candidate *candidate) const {
 
 		// try performing step until the target error (tolerance) or the minimum/maximum step size has been reached
 		while (true) {
-			tryStep(yIn, yOut, yErr, step / c_light, current, z);
+			tryStep(yIn, yOut, yErr, step / v, current, z);
 			r = yErr.u.getR() / tolerance;  // ratio of absolute direction error and tolerance
 			if (r > 1) {  // large direction error relative to tolerance, try to decrease step size
 				if (step == minStep)  // already minimum step size
