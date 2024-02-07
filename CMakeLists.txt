@@ -383,6 +383,7 @@ add_library(crpropa SHARED
   src/module/Boundary.cpp
   src/module/BreakCondition.cpp
   src/module/CandidateSplitting.cpp
+  src/module/ContinuesLoss.cpp
   src/module/DiffusionSDE.cpp
   src/module/EMDoublePairProduction.cpp
   src/module/EMInverseComptonScattering.cpp
