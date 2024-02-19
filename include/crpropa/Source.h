@@ -129,12 +129,17 @@ public:
  * @class SourceCylindricalCDF
  * @brief draw a position in a cylindrical source distribution given by cdfs 
  * 
+ * 	This feature samples a source position in a cylindrical symmetry for given CDFs. 
+ *	The symmetry is assumed to be rotation invariant around the z-axis.
+ *	The CDFs are calculated for the distribution   dN = fR(r) * fZ(z) dr dphi dz. 
+ *	The elements jacobi determent have to be incorporated into the radial pdf fR(r). 
  */
 class SourceCylindricalCDF: public SourceFeature {
 private: 
 	std::vector<double> R_pos, Z_pos; // positions of the CDF 
 	std::vector<double> R_cdf, Z_cdf; // CDF for the position
 	bool debug = false;
+	
 public: 
 	void load_radial(std::string path, double scale = kpc);
 	void load_z(std::string path, double scale = kpc);
