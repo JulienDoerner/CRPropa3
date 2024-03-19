@@ -14,6 +14,7 @@
 #include "crpropa/module/EMDoublePairProduction.h"
 #include "crpropa/module/EMTripletPairProduction.h"
 #include "crpropa/module/EMInverseComptonScattering.h"
+#include "crpropa/module/SynchrotronRadiation.h"
 #include "gtest/gtest.h"
 
 #include <fstream>
@@ -23,24 +24,24 @@ namespace crpropa {
 // ElectronPairProduction -----------------------------------------------------
 TEST(ElectronPairProduction, allBackgrounds) {
 	// Test if interaction data files are loaded.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ElectronPairProduction epp(CMB_instance);
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Stecker05();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Franceschini08();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Finke10();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Dominguez11();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Gilmore12();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Stecker16_upper();
-	epp.setPhotonField(IRB);
-	IRB = new IRB_Stecker16_lower();
-	epp.setPhotonField(IRB);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElectronPairProduction epp(cmb);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	epp.setPhotonField(irb);
+	irb = new IRB_Stecker05();
+	epp.setPhotonField(irb);
+	irb = new IRB_Franceschini08();
+	epp.setPhotonField(irb);
+	irb = new IRB_Finke10();
+	epp.setPhotonField(irb);
+	irb = new IRB_Dominguez11();
+	epp.setPhotonField(irb);
+	irb = new IRB_Gilmore12();
+	epp.setPhotonField(irb);
+	irb = new IRB_Stecker16_upper();
+	epp.setPhotonField(irb);
+	irb = new IRB_Stecker16_lower();
+	epp.setPhotonField(irb);
 }
 
 TEST(ElectronPairProduction, energyDecreasing) {
@@ -49,8 +50,8 @@ TEST(ElectronPairProduction, energyDecreasing) {
 	c.setCurrentStep(2 * Mpc);
 	c.current.setId(nucleusId(1, 1)); // proton
 
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ElectronPairProduction epp1(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElectronPairProduction epp1(cmb);
 	for (int i = 0; i < 80; i++) {
 		double E = pow(10, 15 + i * 0.1) * eV;
 		c.current.setEnergy(E);
@@ -58,8 +59,8 @@ TEST(ElectronPairProduction, energyDecreasing) {
 		EXPECT_LE(c.current.getEnergy(), E);
 	}
 
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	ElectronPairProduction epp2(IRB);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	ElectronPairProduction epp2(irb);
 	for (int i = 0; i < 80; i++) {
 		double E = pow(10, 15 + i * 0.1) * eV;
 		c.current.setEnergy(E);
@@ -70,8 +71,8 @@ TEST(ElectronPairProduction, energyDecreasing) {
 
 TEST(ElectronPairProduction, belowEnergyTreshold) {
 	// Test if nothing happens below 1e15 eV.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ElectronPairProduction epp(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElectronPairProduction epp(cmb);
 	Candidate c(nucleusId(1, 1), 1E14 * eV);
 	epp.process(&c);
 	EXPECT_DOUBLE_EQ(1E14 * eV, c.current.getEnergy());
@@ -79,8 +80,8 @@ TEST(ElectronPairProduction, belowEnergyTreshold) {
 
 TEST(ElectronPairProduction, thisIsNotNucleonic) {
 	// Test if non-nuclei are skipped.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ElectronPairProduction epp(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElectronPairProduction epp(cmb);
 	Candidate c(11, 1E20 * eV);  // electron
 	epp.process(&c);
 	EXPECT_DOUBLE_EQ(1E20 * eV, c.current.getEnergy());
@@ -107,9 +108,9 @@ TEST(ElectronPairProduction, valuesCMB) {
 	Candidate c;
 	c.setCurrentStep(1 * Mpc);
 	c.current.setId(nucleusId(1, 1)); // proton
-	ref_ptr<PhotonField> CMB_instance = new CMB();
+	ref_ptr<PhotonField> cmb = new CMB();
 
-	ElectronPairProduction epp(CMB_instance);
+	ElectronPairProduction epp(cmb);
 	for (int i = 0; i < x.size(); i++) {
 		c.current.setEnergy(x[i]);
 		epp.process(&c);
@@ -117,6 +118,30 @@ TEST(ElectronPairProduction, valuesCMB) {
 		double dE_table = y[i] * 1 * Mpc;
 		EXPECT_NEAR(dE_table, dE, 1e-12);
 	}
+}
+
+TEST(ElectronPairProduction, interactionTag) {
+	
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElectronPairProduction epp(cmb);
+	
+	// test the default interaction tag
+	EXPECT_TRUE(epp.getInteractionTag() == "EPP");
+
+	// test changing the interaction tag
+	epp.setInteractionTag("myTag");
+	EXPECT_TRUE(epp.getInteractionTag() == "myTag");
+
+	// test the tag of produced secondaries
+	Candidate c;
+	c.setCurrentStep(1 * Gpc);
+	c.current.setId(nucleusId(1,1));
+	c.current.setEnergy(100 * EeV);
+	epp.setHaveElectrons(true);
+	epp.process(&c);
+	
+	std::string secondaryTag = c.secondaries[0] -> getTagOrigin();
+	EXPECT_TRUE(secondaryTag == "myTag");
 }
 
 TEST(ElectronPairProduction, valuesIRB) {
@@ -140,9 +165,9 @@ TEST(ElectronPairProduction, valuesIRB) {
 	Candidate c;
 	c.setCurrentStep(1 * Mpc);
 	c.current.setId(nucleusId(1, 1)); // proton
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
 
-	ElectronPairProduction epp(IRB);
+	ElectronPairProduction epp(irb);
 	for (int i = 0; i < x.size(); i++) {
 		c.current.setEnergy(x[i]);
 		epp.process(&c);
@@ -280,38 +305,54 @@ TEST(NuclearDecay, thisIsNotNucleonic) {
 	EXPECT_EQ(10 * EeV, c.current.getEnergy());
 }
 
+TEST(NuclearDecay, interactionTag) {
+	// test default interaction tag
+	NuclearDecay decay;
+	EXPECT_TRUE(decay.getInteractionTag() == "ND");
+
+	// test secondary tag
+	decay.setHaveElectrons(true);
+	Candidate c(nucleusId(8,2), 5 * EeV);
+	decay.performInteraction(&c, 10000);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "ND");
+
+	// test custom tags
+	decay.setInteractionTag("myTag");
+	EXPECT_TRUE(decay.getInteractionTag() == "myTag");
+}
+
 // PhotoDisintegration --------------------------------------------------------
 TEST(PhotoDisintegration, allBackgrounds) {
 	// Test if interaction data files are loaded.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoDisintegration pd(CMB_instance);
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	pd.setPhotonField(IRB);
-	ref_ptr<PhotonField> URB = new URB_Protheroe96();
-	pd.setPhotonField(URB);
-	IRB = new IRB_Stecker05();
-	pd.setPhotonField(IRB);
-	IRB = new IRB_Franceschini08();
-	pd.setPhotonField(IRB);
-	IRB = new IRB_Finke10();
-	pd.setPhotonField(IRB);
-	IRB = new IRB_Dominguez11();
-	pd.setPhotonField(IRB);
-	IRB = new IRB_Gilmore12();
-	pd.setPhotonField(IRB);
-	IRB = new IRB_Stecker16_upper();
-	pd.setPhotonField(IRB);
-	IRB = new IRB_Stecker16_lower();
-	pd.setPhotonField(IRB);
-	URB = new URB_Nitu21();
-	pd.setPhotonField(URB);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoDisintegration pd(cmb);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	pd.setPhotonField(irb);
+	ref_ptr<PhotonField> urb = new URB_Protheroe96();
+	pd.setPhotonField(urb);
+	irb = new IRB_Stecker05();
+	pd.setPhotonField(irb);
+	irb = new IRB_Franceschini08();
+	pd.setPhotonField(irb);
+	irb = new IRB_Finke10();
+	pd.setPhotonField(irb);
+	irb = new IRB_Dominguez11();
+	pd.setPhotonField(irb);
+	irb = new IRB_Gilmore12();
+	pd.setPhotonField(irb);
+	irb = new IRB_Stecker16_upper();
+	pd.setPhotonField(irb);
+	irb = new IRB_Stecker16_lower();
+	pd.setPhotonField(irb);
+	urb = new URB_Nitu21();
+	pd.setPhotonField(urb);
 }
 
 TEST(PhotoDisintegration, carbon) {
 	// Test if a 100 EeV C-12 nucleus photo-disintegrates (at least once) over a distance of 1 Gpc.
 	// This test can stochastically fail.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoDisintegration pd(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoDisintegration pd(cmb);
 	Candidate c;
 	int id = nucleusId(12, 6);
 	c.current.setId(id);
@@ -346,8 +387,8 @@ TEST(PhotoDisintegration, carbon) {
 TEST(PhotoDisintegration, iron) {
 	// Test if a 200 EeV Fe-56 nucleus photo-disintegrates (at least once) over a distance of 1 Gpc.
 	// This test can stochastically fail.
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	PhotoDisintegration pd(IRB);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	PhotoDisintegration pd(irb);
 	Candidate c;
 	int id = nucleusId(56, 26);
 	c.current.setId(id);
@@ -385,8 +426,8 @@ TEST(PhotoDisintegration, iron) {
 
 TEST(PhotoDisintegration, thisIsNotNucleonic) {
 	// Test that nothing happens to an electron.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoDisintegration pd(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoDisintegration pd(cmb);
 	Candidate c;
 	c.setCurrentStep(1 * Mpc);
 	c.current.setId(11); // electron
@@ -398,8 +439,8 @@ TEST(PhotoDisintegration, thisIsNotNucleonic) {
 
 TEST(PhotoDisintegration, limitNextStep) {
 	// Test if the interaction limits the next propagation step.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoDisintegration pd(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoDisintegration pd(cmb);
 	Candidate c;
 	c.setNextStep(std::numeric_limits<double>::max());
 	c.current.setId(nucleusId(4, 2));
@@ -410,10 +451,10 @@ TEST(PhotoDisintegration, limitNextStep) {
 
 TEST(PhotoDisintegration, allIsotopes) {
 	// Test if all isotopes are handled.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoDisintegration pd1(CMB_instance);
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	PhotoDisintegration pd2(IRB);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoDisintegration pd1(cmb);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	PhotoDisintegration pd2(irb);
 	Candidate c;
 	c.setCurrentStep(10 * Mpc);
 
@@ -432,8 +473,8 @@ TEST(PhotoDisintegration, allIsotopes) {
 }
 
 TEST(Photodisintegration, updateParticleParentProperties) { // Issue: #204
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoDisintegration pd(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoDisintegration pd(cmb);
 
 	Candidate c(nucleusId(56,26), 500 * EeV, Vector3d(1 * Mpc, 0, 0));
 
@@ -446,23 +487,40 @@ TEST(Photodisintegration, updateParticleParentProperties) { // Issue: #204
 	EXPECT_NE(c.created.getId(), nucleusId(56,26));
 }
 
+TEST(PhotoDisintegration, interactionTag) {
+	PhotoDisintegration pd(new CMB());
+
+	// test default interactionTag
+	EXPECT_TRUE(pd.getInteractionTag() == "PD");
+
+	// test secondary tag
+	pd.setHavePhotons(true);
+	Candidate c(nucleusId(56,26), 500 * EeV);
+	c.setCurrentStep(1 * Gpc);
+	pd.process(&c);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "PD");
+
+	// test custom tag
+	pd.setInteractionTag("myTag");
+	EXPECT_TRUE(pd.getInteractionTag() == "myTag");
+}
 
 // ElasticScattering ----------------------------------------------------------
 TEST(ElasticScattering, allBackgrounds) {
 	// Test if interaction data files are loaded.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ElasticScattering scattering(CMB_instance);
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	scattering.setPhotonField(IRB);
-	ref_ptr<PhotonField> URB = new URB_Nitu21();
-	scattering.setPhotonField(URB);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElasticScattering scattering(cmb);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	scattering.setPhotonField(irb);
+	ref_ptr<PhotonField> urb = new URB_Nitu21();
+	scattering.setPhotonField(urb);
 }
 
 TEST(ElasticScattering, secondaries) {
 	// Test the creation of cosmic ray photons.
 	// This test can stochastically fail.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ElasticScattering scattering(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ElasticScattering scattering(cmb);
 	Candidate c;
 	int id = nucleusId(12, 6);
 	c.current.setId(id);
@@ -484,35 +542,35 @@ TEST(ElasticScattering, secondaries) {
 // PhotoPionProduction --------------------------------------------------------
 TEST(PhotoPionProduction, allBackgrounds) {
 	// Test if all interaction data files can be loaded.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoPionProduction ppp(CMB_instance);
-	ref_ptr<PhotonField> IRB = new IRB_Kneiske04();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Stecker05();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Franceschini08();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Finke10();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Dominguez11();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Gilmore12();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Stecker16_upper();
-	ppp.setPhotonField(IRB);
-	IRB = new IRB_Stecker16_lower();
-	ppp.setPhotonField(IRB);
-	ref_ptr<PhotonField> URB = new URB_Protheroe96();
-	ppp.setPhotonField(URB);
-	URB = new URB_Nitu21();
-	ppp.setPhotonField(URB);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoPionProduction ppp(cmb);
+	ref_ptr<PhotonField> irb = new IRB_Kneiske04();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Stecker05();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Franceschini08();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Finke10();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Dominguez11();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Gilmore12();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Stecker16_upper();
+	ppp.setPhotonField(irb);
+	irb = new IRB_Stecker16_lower();
+	ppp.setPhotonField(irb);
+	ref_ptr<PhotonField> urb = new URB_Protheroe96();
+	ppp.setPhotonField(urb);
+	urb = new URB_Nitu21();
+	ppp.setPhotonField(urb);
 }
 
 TEST(PhotoPionProduction, proton) {
-	// Test photo-pion interaction for 100 EeV proton.
+	// Test photopion interaction for 100 EeV proton.
 	// This test can stochastically fail.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoPionProduction ppp(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoPionProduction ppp(cmb);
 	Candidate c(nucleusId(1, 1), 100 * EeV);
 	c.setCurrentStep(1000 * Mpc);
 	ppp.process(&c);
@@ -530,8 +588,8 @@ TEST(PhotoPionProduction, proton) {
 TEST(PhotoPionProduction, helium) {
 	// Test photo-pion interaction for 400 EeV He nucleus.
 	// This test can stochastically fail.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoPionProduction ppp(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoPionProduction ppp(cmb);
 	Candidate c;
 	c.current.setId(nucleusId(4, 2));
 	c.current.setEnergy(400. * EeV);
@@ -544,9 +602,9 @@ TEST(PhotoPionProduction, helium) {
 }
 
 TEST(PhotoPionProduction, thisIsNotNucleonic) {
-	// Test if noting happens to an electron.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoPionProduction ppp(CMB_instance);
+	// Test if nothing happens to an electron.
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoPionProduction ppp(cmb);
 	Candidate c;
 	c.current.setId(11); // electron
 	c.current.setEnergy(10 * EeV);
@@ -558,8 +616,8 @@ TEST(PhotoPionProduction, thisIsNotNucleonic) {
 
 TEST(PhotoPionProduction, limitNextStep) {
 	// Test if the interaction limits the next propagation step.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoPionProduction ppp(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoPionProduction ppp(cmb);
 	Candidate c(nucleusId(1, 1), 200 * EeV);
 	c.setNextStep(std::numeric_limits<double>::max());
 	ppp.process(&c);
@@ -569,13 +627,47 @@ TEST(PhotoPionProduction, limitNextStep) {
 TEST(PhotoPionProduction, secondaries) {
 	// Test photo-pion interaction for 100 EeV proton.
 	// This test can stochastically fail.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	PhotoPionProduction ppp(CMB_instance, true, true, true);
+	ref_ptr<PhotonField> cmb = new CMB();
+	PhotoPionProduction ppp(cmb, true, true, true);
 	Candidate c(nucleusId(1, 1), 100 * EeV);
 	c.setCurrentStep(1000 * Mpc);
 	ppp.process(&c);
 	// there should be secondaries
 	EXPECT_GT(c.secondaries.size(), 1);
+}
+
+TEST(PhotoPionProduction, sampling) {
+	// Specific test of photon sampling of photo-pion production
+	// by testing the calculated pEpsMax for CMB(), also indirectly
+	// testing epsMinInteraction and logSampling (default).
+	ref_ptr<PhotonField> cmb = new CMB(); //create CMB instance
+	double energy = 1.e10; //1e10 GeV
+	bool onProton = true; //proton
+	double z = 0; //no redshift
+	PhotoPionProduction ppp(cmb, true, true, true);
+	double correctionFactor = ppp.getCorrectionFactor(); //get current correctionFactor
+	double epsMin = std::max(cmb -> getMinimumPhotonEnergy(z) / eV, 0.00710614); // 0.00710614 = epsMinInteraction(onProton,energy)
+	double epsMax = cmb -> getMaximumPhotonEnergy(z) / eV;
+	double pEpsMax = ppp.probEpsMax(onProton, energy, z, epsMin, epsMax) / correctionFactor;
+	EXPECT_DOUBLE_EQ(pEpsMax,132673934934.922);
+}
+
+TEST(PhotoPionProduction, interactionTag) {
+	PhotoPionProduction ppp(new CMB());
+
+	// test default interactionTag
+	EXPECT_TRUE(ppp.getInteractionTag() == "PPP");
+
+	// test secondary tag
+	ppp.setHavePhotons(true);
+	Candidate c(nucleusId(1,1), 100 * EeV);
+	for(int i = 0; i <10; i++) 
+		ppp.performInteraction(&c, true);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "PPP");
+
+	// test custom interactionTag
+	ppp.setInteractionTag("myTag");
+	EXPECT_TRUE(ppp.getInteractionTag() == "myTag");
 }
 
 // Redshift -------------------------------------------------------------------
@@ -636,8 +728,8 @@ TEST(EMPairProduction, allBackgrounds) {
 
 TEST(EMPairProduction, limitNextStep) {
 	// Test if the interaction limits the next propagation step.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	EMPairProduction m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	EMPairProduction m(cmb);
 	Candidate c(22, 1E17 * eV);
 	c.setNextStep(std::numeric_limits<double>::max());
 	m.process(&c);
@@ -646,15 +738,17 @@ TEST(EMPairProduction, limitNextStep) {
 
 TEST(EMPairProduction, secondaries) {
 	// Test if secondaries are correctly produced.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ref_ptr<PhotonField> IRB = new IRB_Gilmore12();
-	EMPairProduction m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ref_ptr<PhotonField> irb = new IRB_Saldana21();
+	ref_ptr<PhotonField> urb = new URB_Nitu21();
+	EMPairProduction m(cmb);
 	m.setHaveElectrons(true);
 	m.setThinning(0.);
 
-	std::vector< ref_ptr<PhotonField> > fields;
-	fields.push_back(CMB_instance);
-	fields.push_back(IRB);
+	std::vector<ref_ptr<PhotonField>> fields;
+	fields.push_back(cmb);
+	fields.push_back(irb);
+	fields.push_back(urb);
 
 	// loop over photon backgrounds
 	for (int f = 0; f < fields.size(); f++) {
@@ -662,11 +756,11 @@ TEST(EMPairProduction, secondaries) {
 		for (int i = 0; i < 140; i++) { // loop over energies Ep = (1e10 - 1e23) eV
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
 			Candidate c(22, Ep);
-			c.setCurrentStep(std::numeric_limits<double>::max());
-			// c.setCurrentStep(1e10 * Mpc);
+			c.setCurrentStep(1e10 * Mpc);
+
 			m.process(&c);
 
-			// pass if no interaction has occured (no tabulated rates)
+			// pass if no interaction has ocurred (no tabulated rates)
 			if (c.isActive())
 				continue;
 			
@@ -687,6 +781,23 @@ TEST(EMPairProduction, secondaries) {
 			EXPECT_DOUBLE_EQ(Ep, Etot);
 		}
 	}
+}
+
+TEST(EMPairProduction, interactionTag) {
+	EMPairProduction m(new CMB());
+
+	// test default interactionTag
+	EXPECT_TRUE(m.getInteractionTag() == "EMPP");
+
+	// test secondary tag
+	m.setHaveElectrons(true);
+	Candidate c(22, 1 * EeV);
+	m.performInteraction(&c);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "EMPP");
+
+	// test custom tag
+	m.setInteractionTag("myTag");
+	EXPECT_TRUE(m.getInteractionTag() == "myTag");
 }
 
 // EMDoublePairProduction -----------------------------------------------------
@@ -720,8 +831,8 @@ TEST(EMDoublePairProduction, allBackgrounds) {
 
 TEST(EMDoublePairProduction, limitNextStep) {
 	// Test if the interaction limits the next propagation step.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	EMDoublePairProduction m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	EMDoublePairProduction m(cmb);
 	Candidate c(22, 1E17 * eV);
 	c.setNextStep(std::numeric_limits<double>::max());
 	m.process(&c);
@@ -730,17 +841,17 @@ TEST(EMDoublePairProduction, limitNextStep) {
 
 TEST(EMDoublePairProduction, secondaries) {
 	// Test if secondaries are correctly produced.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ref_ptr<PhotonField> IRB = new IRB_Gilmore12();
-	ref_ptr<PhotonField> URB = new URB_Nitu21();
-	EMDoublePairProduction m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ref_ptr<PhotonField> irb = new IRB_Saldana21();
+	ref_ptr<PhotonField> urb = new URB_Nitu21();
+	EMPairProduction m(cmb);
 	m.setHaveElectrons(true);
 	m.setThinning(0.);
 
-	std::vector< ref_ptr<PhotonField> > fields;
-	fields.push_back(CMB_instance);
-	fields.push_back(IRB);
-	fields.push_back(URB);
+	std::vector<ref_ptr<PhotonField>> fields;
+	fields.push_back(cmb);
+	fields.push_back(irb);
+	fields.push_back(urb);
 
 	// loop over photon backgrounds
 	for (int f = 0; f < fields.size(); f++) {
@@ -750,7 +861,6 @@ TEST(EMDoublePairProduction, secondaries) {
 		for (int i = 0; i < 140; i++) {
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
 			Candidate c(22, Ep);
-			// c.setCurrentStep(std::numeric_limits<double>::max());
 			c.setCurrentStep(1e4 * Mpc); // use lower value so that the test can run faster
 			m.process(&c);
 
@@ -775,6 +885,23 @@ TEST(EMDoublePairProduction, secondaries) {
 			EXPECT_NEAR(Ep, Etot, 1E-9);
 		}
 	}
+}
+
+TEST(EMDoublePairProduction, interactionTag) {
+	EMDoublePairProduction m(new CMB());
+
+	// test default interactionTag
+	EXPECT_TRUE(m.getInteractionTag() == "EMDP");
+
+	// test secondary tag
+	m.setHaveElectrons(true);
+	Candidate c(22, 1 * EeV);
+	m.performInteraction(&c);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "EMDP");
+
+	// test custom tag
+	m.setInteractionTag("myTag");
+	EXPECT_TRUE(m.getInteractionTag() == "myTag");
 }
 
 // EMTripletPairProduction ----------------------------------------------------
@@ -808,8 +935,8 @@ TEST(EMTripletPairProduction, allBackgrounds) {
 
 TEST(EMTripletPairProduction, limitNextStep) {
 	// Test if the interaction limits the next propagation step.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	EMTripletPairProduction m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	EMTripletPairProduction m(cmb);
 	Candidate c(11, 1E17 * eV);
 	c.setNextStep(std::numeric_limits<double>::max());
 	m.process(&c);
@@ -818,23 +945,24 @@ TEST(EMTripletPairProduction, limitNextStep) {
 
 TEST(EMTripletPairProduction, secondaries) {
 	// Test if secondaries are correctly produced.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ref_ptr<PhotonField> IRB = new IRB_Gilmore12();
-	ref_ptr<PhotonField> URB = new URB_Nitu21();
-	EMTripletPairProduction m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ref_ptr<PhotonField> irb = new IRB_Saldana21();
+	ref_ptr<PhotonField> urb = new URB_Nitu21();
+	EMPairProduction m(cmb);
 	m.setHaveElectrons(true);
+	m.setThinning(0.);
 
-	std::vector< ref_ptr<PhotonField> > fields;
-	fields.push_back(CMB_instance);
-	fields.push_back(IRB);
-	fields.push_back(URB);
+	std::vector<ref_ptr<PhotonField>> fields;
+	fields.push_back(cmb);
+	fields.push_back(irb);
+	fields.push_back(urb);
 
 	// loop over photon backgrounds
 	for (int f = 0; f < fields.size(); f++) {
 		m.setPhotonField(fields[f]);
 		
 		// loop over energies Ep = (1e9 - 1e23) eV
-		for (int i = 0; i < 130; i++) {
+		for (int i = 0; i < 140; i++) {
 
 			double Ep = pow(10, 9.05 + 0.1 * i) * eV;
 			Candidate c(11, Ep);
@@ -862,6 +990,23 @@ TEST(EMTripletPairProduction, secondaries) {
 			EXPECT_NEAR(Ep, Etot, 1e-9);
 		}
 	}
+}
+
+TEST(EMTripletPairProduction, interactionTag) {
+	EMTripletPairProduction m(new CMB());
+
+	// test default interactionTag
+	EXPECT_TRUE(m.getInteractionTag() == "EMTP");
+
+	// test secondary tag
+	m.setHaveElectrons(true);
+	Candidate c(11, 1 * EeV);
+	m.performInteraction(&c);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "EMTP");
+
+	// test custom tag
+	m.setInteractionTag("myTag");
+	EXPECT_TRUE(m.getInteractionTag() == "myTag");
 }
 
 // EMInverseComptonScattering -------------------------------------------------
@@ -895,8 +1040,8 @@ TEST(EMInverseComptonScattering, allBackgrounds) {
 
 TEST(EMInverseComptonScattering, limitNextStep) {
 	// Test if the interaction limits the next propagation step.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	EMInverseComptonScattering m(CMB_instance);
+	ref_ptr<PhotonField> cmb = new CMB();
+	EMInverseComptonScattering m(cmb);
 	Candidate c(11, 1E17 * eV);
 	c.setNextStep(std::numeric_limits<double>::max());
 	m.process(&c);
@@ -905,16 +1050,17 @@ TEST(EMInverseComptonScattering, limitNextStep) {
 
 TEST(EMInverseComptonScattering, secondaries) {
 	// Test if secondaries are correctly produced.
-	ref_ptr<PhotonField> CMB_instance = new CMB();
-	ref_ptr<PhotonField> IRB = new IRB_Gilmore12();
-	ref_ptr<PhotonField> URB = new URB_Nitu21();
-	EMInverseComptonScattering m(CMB_instance);
-	m.setHavePhotons(true);
+	ref_ptr<PhotonField> cmb = new CMB();
+	ref_ptr<PhotonField> irb = new IRB_Saldana21();
+	ref_ptr<PhotonField> urb = new URB_Nitu21();
+	EMPairProduction m(cmb);
+	m.setHaveElectrons(true);
+	m.setThinning(0.);
 
-	std::vector< ref_ptr<PhotonField> > fields;
-	fields.push_back(CMB_instance);
-	fields.push_back(IRB);
-	fields.push_back(URB);
+	std::vector<ref_ptr<PhotonField>> fields;
+	fields.push_back(cmb);
+	fields.push_back(irb);
+	fields.push_back(urb);
 
 	// loop over photon backgrounds
 	for (int f = 0; f < fields.size(); f++) {
@@ -949,6 +1095,41 @@ TEST(EMInverseComptonScattering, secondaries) {
 			EXPECT_NEAR(Ep, Etot, 1e-9); 
 		}
 	}
+}
+
+TEST(EMInverseComptonScattering, interactionTag) {
+	EMInverseComptonScattering m(new CMB());
+
+	// test default interactionTag
+	EXPECT_TRUE(m.getInteractionTag() == "EMIC");
+
+	// test secondary tag
+	m.setHavePhotons(true);
+	Candidate c(11, 1 * PeV);
+	m.performInteraction(&c);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "EMIC");
+
+	// test custom tag
+	m.setInteractionTag("myTag");
+	EXPECT_TRUE(m.getInteractionTag() == "myTag");
+}
+
+// SynchrotronRadiation -------------------------------------------------
+TEST(SynchrotronRadiation, interactionTag) {
+	SynchrotronRadiation s(1 * muG, true);
+
+	// test default interactionTag
+	EXPECT_TRUE(s.getInteractionTag() == "SYN");
+
+	// test secondary tag
+	Candidate c(11, 10 * PeV);
+	c.setCurrentStep(1 * pc);
+	s.process(&c);
+	EXPECT_TRUE(c.secondaries[0] -> getTagOrigin() == "SYN");
+
+	// test custom tag
+	s.setInteractionTag("myTag");
+	EXPECT_TRUE(s.getInteractionTag() == "myTag");
 }
 
 // Bremsstrahlung -------------------------------------------------

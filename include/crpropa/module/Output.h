@@ -40,6 +40,7 @@ namespace crpropa {
  . X1/Y1/Z1		 CreatedPositionColumn
  . P1x/P1y/P1z	 CreatedDirectionColumn
  . z			 RedshiftColumn
+ . tag			 CandidateTagColumn
  . weight		 WeightColumn
 
  Some output types are pre-defined: 
@@ -85,6 +86,7 @@ public:
 		CreatedEnergyColumn,
 		CreatedPositionColumn,
 		CreatedDirectionColumn,
+		CandidateTagColumn,
 		SerialNumberColumn,
 		WeightColumn
 	};
@@ -125,14 +127,14 @@ public:
 	void setOutputType(OutputType outputType);
 	/** Determines whether a given column will be displayed in the output.
 	 @param field	name of the field to be added/removed from output
-	 @param values	boolean flag adding (true) or removing (false) the field
+	 @param value	boolean flag adding (true) or removing (false) the field
 	 */
 	void set(OutputColumn field, bool value);
 	/** Add a property to output. 
 	 Default value is required to assign a type in the output.
-	 @param property	string containing name of property
-	 @param default		default value of property
-	 @param	comment		string with a comment
+	 @param property		string containing name of property
+	 @param defaultValue	default value of property
+	 @param	comment			string with a comment
 	 */
 	void enableProperty(const std::string &property, const Variant& defaultValue, const std::string &comment = "");
 	/** Enable specific column in the output.

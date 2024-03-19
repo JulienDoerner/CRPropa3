@@ -52,7 +52,7 @@ void GridTurbulence::initTurbulence() {
 	// double kMax = 2*M_PI / lMin; // * 2 * spacing.x; // spacing.x / lMin;
 	double kMin = spacing.x / spectrum.getLmax();
 	double kMax = spacing.x / spectrum.getLmin();
-	auto lambda = spectrum.getLbendover() / spacing.x * 2 * M_PI;
+	auto lambda = 1 / spacing.x * 2 * M_PI;
 
 	Vector3f n0(1, 1, 1); // arbitrary vector to construct orthogonal base
 
@@ -138,6 +138,8 @@ void GridTurbulence::checkGridRequirements(ref_ptr<Grid3f> grid, double lMin,
 		throw std::runtime_error("turbulentField: lMin < 2 * spacing");
 	if (lMax > Nx * spacing.x) // before was (lMax > Nx * spacing.x / 2), why?
 		throw std::runtime_error("turbulentField: lMax > size");
+	if (lMax < lMin) 
+		throw std::runtime_error("lMax < lMin");
 }
 
 // Execute inverse discrete FFT in-place for a 3D grid, from complex to real

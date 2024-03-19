@@ -31,6 +31,11 @@ public:
 	 @param z			redshift (if redshift dependent, default = 0.)
 	 */
 	virtual double getPhotonDensity(double ePhoton, double z = 0.) const = 0;
+	virtual double getMinimumPhotonEnergy(double z) const = 0;
+	virtual double getMaximumPhotonEnergy(double z) const = 0;
+	virtual std::string getFieldName() const {
+		return this->fieldName;
+	}
 
 	/**
 	 returns overall comoving scaling factor
@@ -45,8 +50,8 @@ public:
 		return this->isRedshiftDependent;
 	}
 
-	std::string getFieldName() const {
-		return this->fieldName;
+	void setFieldName(std::string fieldName) {
+		this->fieldName = fieldName;
 	}
 
 protected:
@@ -66,8 +71,11 @@ protected:
 class TabularPhotonField: public PhotonField {
 public:
 	TabularPhotonField(const std::string fieldName, const bool isRedshiftDependent = true);
+
 	double getPhotonDensity(double ePhoton, double z = 0.) const;
 	double getRedshiftScaling(double z) const;
+	double getMinimumPhotonEnergy(double z) const;
+	double getMaximumPhotonEnergy(double z) const;
 
 protected:
 	void readPhotonEnergy(std::string filePath);
@@ -187,6 +195,45 @@ public:
 };
 
 /**
+ @class IRB_Saldana21
+ @brief Extragalactic background light model from Saldana-Lopez et al. 2021
+
+ Source info:
+ DOI:10.1093/mnras/stab2393
+ https://ui.adsabs.harvard.edu/abs/2021MNRAS.507.5144S/abstract
+ */
+class IRB_Saldana21: public TabularPhotonField {
+public:
+	IRB_Saldana21() : TabularPhotonField("IRB_Saldana21", true) {}
+};
+
+/**
+ @class IRB_Saldana21_upper
+ @brief Extragalactic background light model from Saldana-Lopez et al. 2021 (upper-bound model)
+
+ Source info:
+ DOI:10.1093/mnras/stab2393
+ https://ui.adsabs.harvard.edu/abs/2021MNRAS.507.5144S/abstract
+ */
+class IRB_Saldana21_upper: public TabularPhotonField {
+public:
+	IRB_Saldana21_upper() : TabularPhotonField("IRB_Saldana21_upper", true) {}
+};
+
+/**
+ @class IRB_Saldana21_lower
+ @brief Extragalactic background light model from Saldana-Lopez et al. 2021 (lower-bound model)
+
+ Source info:
+ DOI:10.1093/mnras/stab2393
+ https://ui.adsabs.harvard.edu/abs/2021MNRAS.507.5144S/abstract
+ */
+class IRB_Saldana21_lower: public TabularPhotonField {
+public:
+	IRB_Saldana21_lower() : TabularPhotonField("IRB_Saldana21_lower", true) {}
+};
+
+/**
  @class URB
  @brief Extragalactic background light model from Protheroe & Biermann 1996
 
@@ -202,11 +249,11 @@ public:
 /**
  @class URB
  @brief Extragalactic background light model based on ARCADE2 observations, by Fixsen et al.
- Note that this model does not cover the same energy range as other URB models. Here, only ~10 MHz - 10 GHz is considered. 
+ Note that this model does not cover the same energy range as other URB models. Here, only ~10 MHz - 10 GHz is considered.
  Therefore, it only makes sense to use this model in very specific studies.
-  
+
  Source info:
- DOI:10.1088/0004-637X/734/1/5 
+ DOI:10.1088/0004-637X/734/1/5
  https://iopscience.iop.org/article/10.1088/0004-637X/734/1/5
  */
 class URB_Fixsen11: public TabularPhotonField {
@@ -216,8 +263,8 @@ public:
 
 /**
  @class URB
- @brief Extragalactic background light model by Nitu et al. 
-  
+ @brief Extragalactic background light model by Nitu et al.
+
  Source info:
  DOI:10.1016/j.astropartphys.2020.102532
  https://www.sciencedirect.com/science/article/pii/S0927650520301043?
@@ -235,9 +282,13 @@ class BlackbodyPhotonField: public PhotonField {
 public:
 	BlackbodyPhotonField(const std::string fieldName, const double blackbodyTemperature);
 	double getPhotonDensity(double ePhoton, double z = 0.) const;
+	double getMinimumPhotonEnergy(double z) const;
+	double getMaximumPhotonEnergy(double z) const;
+	void setQuantile(double q);
 
 protected:
 	double blackbodyTemperature;
+	double quantile;
 };
 
 /**
@@ -252,67 +303,6 @@ public:
 	CMB() : BlackbodyPhotonField("CMB", 2.73) {}
 };
 
-
-/**
- @class PhotonFieldSampling
- @brief Reimplementation of SOPHIA photon sampling. Naming and unit conventions are taken from SOPHIA to ease comparisions.
- */
-class PhotonFieldSampling {
-public:
-	PhotonFieldSampling();
-
-	/**
-	 Constructor to mimic SOPHIA structure.
-	  @param bgFlag		1: CMB | 2: IRB_Kneiske04
-	 */
-	explicit PhotonFieldSampling(int bgFlag);
-
-	/**
-	 SOPHIA's photon sampling method. Returns energy [J] of a photon of the photon field.
-	 @param onProton	particle type: proton or neutron
-	 @param E_in		energy of incoming nucleon
-	 @param z_in		redshift of incoming nucleon
-	 */
-	double sample_eps(bool onProton, double E_in, double z_in) const;
-protected:
-	int bgFlag;
-
-	// called by: sample_eps
-	// - input: photon energy [eV], redshift
-	// - output: photon density per unit energy [#/(eVcm^3)]
-	double getPhotonDensity(double eps, double z_in) const;
-
-	// called by: sample_eps
-	// - input: s [GeV^2]
-	// - output: (s-p^2) * sigma_(nucleon/gamma) [GeV^2 * mubarn]
-	double functs(double s, bool onProton) const;
-
-	// called by: sample_eps, gaussInt
-	// - input: photon energy eps [eV], E_in [GeV]
-	// - output: probability to encounter photon of energy eps
-	double prob_eps(double eps, bool onProton, double E_in, double z_in) const;
-
-	// called by: functs
-	// - input: photon energy [eV]
-	// - output: crossection of nucleon-photon-interaction [mubarn]
-	double crossection(double eps, bool onProton) const;
-
-	// called by: crossection
-	// - input: photon energy [eV], threshold [eV], max [eV], unknown [no unit]
-	// - output: unknown [no unit]
-	double Pl(double x, double xth, double xmax, double alpha) const;
-
-	// called by: crossection
-	// - input: photon energy [eV], threshold [eV], unknown [eV]
-	// - output: unknown [no unit]
-	double Ef(double x, double th, double w) const;
-
-	// called by: crossection
-	// - input: cross section [µbarn], width [GeV], mass [GeV/c^2], rest frame photon energy [GeV]
-	// - output: Breit-Wigner crossection of a resonance of width Gamma
-	double breitwigner(double sigma_0, double Gamma, double DMM, double epsPrime, bool onProton) const;
-};
-/** @}*/
 
 } // namespace crpropa
 

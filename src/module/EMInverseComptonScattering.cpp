@@ -124,7 +124,7 @@ class ICSSecondariesEnergyDistribution {
 			Ns = 1000;
 			Nrer = 1000;
 			s_min = mec2 * mec2;
-			s_max = 1e23 * eV * eV;
+			s_max = 2e23 * eV * eV;
 			dls = (log(s_max) - log(s_min)) / Ns;
 			data = std::vector< std::vector<double> >(1000, std::vector<double>(1000));
 			std::vector<double> data_i(1000);
@@ -191,12 +191,11 @@ void EMInverseComptonScattering::performInteraction(Candidate *candidate) const 
 	// add up-scattered photon
 	double Esecondary = E - Enew;
 	double f = Enew / E;
-	double w0 = candidate->getWeight();
 	if (havePhotons) {
 		if (random.rand() < pow(1 - f, thinning)) {
-			double w = w0 / pow(1 - f, thinning);
+			double w = 1. / pow(1 - f, thinning);
 			Vector3d pos = random.randomInterpolatedPosition(candidate->previous.getPosition(), candidate->current.getPosition());
-			candidate->addSecondary(22, Esecondary / (1 + z), pos, w);
+			candidate->addSecondary(22, Esecondary / (1 + z), pos, w, interactionTag);
 		}
 	}
 
@@ -237,6 +236,14 @@ void EMInverseComptonScattering::process(Candidate *candidate) const {
 		// repeat with remaining step
 		step -= randDistance;
 	} while (step > 0);
+}
+
+void EMInverseComptonScattering::setInteractionTag(std::string tag) {
+	interactionTag = tag;
+}
+
+std::string EMInverseComptonScattering::getInteractionTag() const {
+	return interactionTag;
 }
 
 } // namespace crpropa

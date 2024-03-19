@@ -12,9 +12,9 @@ namespace crpropa {
 
 ElectronPairProduction::ElectronPairProduction(ref_ptr<PhotonField> photonField,
 		bool haveElectrons, double limit) {
-	setPhotonField(photonField);
 	this->haveElectrons = haveElectrons;
 	this->limit = limit;
+	setPhotonField(photonField);
 }
 
 void ElectronPairProduction::setPhotonField(ref_ptr<PhotonField> photonField) {
@@ -22,11 +22,17 @@ void ElectronPairProduction::setPhotonField(ref_ptr<PhotonField> photonField) {
 	std::string fname = photonField->getFieldName();
 	setDescription("ElectronPairProduction: " + fname);
 	initRate(getDataPath("ElectronPairProduction/lossrate_" + fname + ".txt"));
-	initSpectrum(getDataPath("ElectronPairProduction/spectrum_" + fname.substr(0,3) + ".txt"));
+	if (haveElectrons) { // Load secondary spectra only if electrons should be produced
+		initSpectrum(getDataPath("ElectronPairProduction/spectrum_" + fname.substr(0,3) + ".txt"));
+	}
 }
 
 void ElectronPairProduction::setHaveElectrons(bool haveElectrons) {
 	this->haveElectrons = haveElectrons;
+	if (haveElectrons) { // Load secondary spectra in case haveElectrons was changed to true
+		std::string fname = photonField->getFieldName();
+		initSpectrum(getDataPath("ElectronPairProduction/spectrum_" + fname.substr(0,3) + ".txt"));
+	}
 }
 
 void ElectronPairProduction::setLimit(double limit) {
@@ -130,13 +136,22 @@ void ElectronPairProduction::process(Candidate *c) const {
 			// create pair and repeat with remaining energy
 			dE -= Epair;
 			Vector3d pos = random.randomInterpolatedPosition(c->previous.getPosition(), c->current.getPosition());
-			c->addSecondary( 11, Ee, pos);
-			c->addSecondary(-11, Ee, pos);
+			c->addSecondary( 11, Ee, pos, 1., interactionTag);
+			c->addSecondary(-11, Ee, pos, 1., interactionTag);
 		}
 	}
 
 	c->current.setLorentzFactor(lf * (1 - loss));
 	c->limitNextStep(limit * losslen);
 }
+
+void ElectronPairProduction::setInteractionTag(std::string tag) {
+	interactionTag = tag;
+}
+
+std::string ElectronPairProduction::getInteractionTag() const {
+	return interactionTag;
+}
+
 
 } // namespace crpropa
