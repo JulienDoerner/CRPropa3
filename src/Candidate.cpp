@@ -137,7 +137,7 @@ void Candidate::addSecondary(Candidate *c) {
 }
 
 void Candidate::addSecondary(int id, double energy, double w, std::string tagOrigin) {
-	addSecondary(id, energy, current.getPosition(), w, tagOrigin);
+	addSecondary(id, energy, previous.getPosition(), w, tagOrigin);
 }
 
 void Candidate::addSecondary(int id, double energy, Vector3d position, double w, std::string tagOrigin) {
