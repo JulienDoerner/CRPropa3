@@ -85,6 +85,33 @@ public:
 };
 
 
+class DiffusionMultipleBreaks: public DiffusionTensor {
+private: 
+    double initialIndex;            //< power law index before the first break
+    double norm;                    //< normalisation at a given energy
+    double Enorm;                   //< normalisation energy
+    double eps;                     //< anisotropy of the diffusion tensor
+
+    std::vector<double> index_s;    //< power law slope after break s
+    std::vector<double> break_s;    //< energy of the break
+    std::vector<double> norm_s;  //< normalisation at a given break 
+
+public:
+    DiffusionMultipleBreaks(double initialIndex, double eps, double norm = 6.1e24 , double Enorm = 4 * GeV);
+
+    double getDiffusionCoefficient(double E) const;
+    Vector3d getTensorDiagonal(double E, int id = 0, double B = 0) const; 
+
+    /**
+        add a break to the diffusion tensor
+        @param index    power law slope after the break
+        @param E        Energy of the break
+    */
+    void addBreak(double index, double E);
+
+
+};
+
 class DiffusionCRINGE : public DiffusionTensor {
 private: 
     const double norm = 5.18e24; // norm of the diffusion tensor in m2/s
@@ -99,6 +126,40 @@ public:
         return "Diffusion Tensor with the best fit of the CRINGE model.\n";
     }
 
+};
+
+class DiffusionBPLsoft : public DiffusionTensor {
+  private: 
+    double norm = 7.03e25; // norm of the diffusion tensor in m2/s
+    double breakEnergy = 63 * GeV; // energy of the break
+    double index1 = 0.334; // spectral index below the break
+    double index2 = -0.324; // spectral index above the break
+    double epsilon = 0.1; // anisotropy of the tensor
+
+  public:
+
+    DiffusionBPLsoft(double norm = 7.03e25, double breakEnergy = 63 * GeV, double index1 = 0.334, double index2 = -0.324, double epsilon = 0.1);
+
+    Vector3d getTensorDiagonal(double Energy, int id = 0, double B = 0) const;
+
+    std::string getDescription() {
+        return "Diffusion Tensor with a broken power law with a soft break.\n";
+    }
+
+    void setEpsilon(double eps);
+    double getEpsilon() const;
+
+    void setIndex1(double a);
+    double getIndex1() const;
+
+    void setIndex2(double a);
+    double getIndex2() const;
+
+    void setBreakEnergy(double E);
+    double getBreakEnergy() const;
+
+    void setNorm(double n);
+    double getNorm() const;
 };
 
 } // namespace crpropa
