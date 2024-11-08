@@ -77,6 +77,20 @@ public:
 	std::string getDescription() const;
 };
 
+/**
+ @class SourceListNumbered
+ @brief List of sources with a fixed number of candidates emitted per source
+
+class SourceListNumbered: public SourceInterface {
+private:
+	std::vector<ref_ptr<Source> > sources; //
+	int nSource; //< number of candidates from each source
+	int alreadyDrawn; //< number of candidates which have already been drawn
+
+public:
+	void add(Source* source); 
+	ref_ptr<Candidate> getCandidate() const;
+};*/
 
 /**
  @class SourceParticleType
@@ -950,6 +964,25 @@ public:
 	void setMaximalTries(int tries);
 
 	std::string getDescription();
+};
+
+class SourceStartTime: public SourceFeature {
+private: 
+	double time; //< starting time for the particle 
+
+public: 
+	SourceStartTime(double time);
+	void prepareCandidate(Candidate& cand) const;
+};
+
+class SourceAddProperty: public SourceFeature {
+private: 
+	std::string key; 	//< property key
+	int value; 			//< property 
+
+public: 
+	SourceAddProperty(std::string key, int value);
+	void prepareCandidate(Candidate& cand) const;
 };
 
 /**  @} */ // end of group SourceFeature

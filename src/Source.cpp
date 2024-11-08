@@ -1204,4 +1204,20 @@ std::string SourceMassDistribution::getDescription() {
 	return ss.str();
 }
 
+// ----------------------------------------------------------------------------
+
+SourceStartTime::SourceStartTime(double time) : time(time) {}
+
+void SourceStartTime::prepareCandidate(Candidate& cand) const {
+	cand.setTrajectoryLength(time); 
+}
+
+// ----------------------------------------------------------------------------
+
+SourceAddProperty::SourceAddProperty(std::string key, int value) : key(key), value(value) {}
+
+void SourceAddProperty::prepareCandidate(Candidate& cand) const {
+	cand.setProperty(key, value);
+}
+
 } // namespace crpropa
