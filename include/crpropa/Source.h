@@ -985,6 +985,22 @@ public:
 	void prepareCandidate(Candidate& cand) const;
 };
 
+/**
+ * Adds an initial weight to the Candidate for the source injection spectrum. 
+ * The weight follows w(E) = norm * (E / E0)^(-alpha)
+ */
+class SourceInitialWeight: public SourceFeature {
+  private: 
+	double norm;
+	double alpha; 
+	double E0; 
+
+  public:
+	SourceInitialWeight(double norm = 1, double alpha = 1, double E0 = 1 * GeV);
+	void prepareCandidate(Candidate *candidate) const;
+};
+
+
 /**  @} */ // end of group SourceFeature
 
 } // namespace crpropa

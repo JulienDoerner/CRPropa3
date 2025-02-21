@@ -38,7 +38,7 @@ public:
 		T data[3];
 	};
 
-	Vector3() : data{0., 0., 0.} {
+	Vector3() : data{T(0), T(0), T(0)} {
 	}
 
 	// avoid creation of default non-conversion constructor
@@ -433,6 +433,7 @@ inline Vector3<T> operator *(T f, const Vector3<T> &v) {
 
 typedef Vector3<double> Vector3d;
 typedef Vector3<float> Vector3f;
+typedef Vector3<int> Vector3i;
 
 /** @}*/
 }  // namespace crpropa

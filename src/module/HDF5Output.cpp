@@ -5,7 +5,6 @@
 #include "crpropa/Random.h"
 #include "kiss/logger.h"
 
-#include <hdf5.h>
 #include <cstring>
 
 const hsize_t RANK = 1;

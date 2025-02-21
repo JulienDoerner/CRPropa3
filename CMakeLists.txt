@@ -367,6 +367,7 @@ add_library(crpropa SHARED
   src/module/CandidateSplitting.cpp
   src/module/ContinuesLoss.cpp
   src/module/DiffusionSDE.cpp
+  src/module/dynamic_hist.cpp
   src/module/EMDoublePairProduction.cpp
   src/module/EMInverseComptonScattering.cpp
   src/module/EMPairProduction.cpp

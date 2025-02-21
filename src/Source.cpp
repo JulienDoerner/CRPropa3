@@ -1220,4 +1220,15 @@ void SourceAddProperty::prepareCandidate(Candidate& cand) const {
 	cand.setProperty(key, value);
 }
 
+// ----------------------------------------------------------------------------
+
+SourceInitialWeight::SourceInitialWeight(double norm, double alpha, double E0) : norm(norm), alpha(alpha), E0(E0) { }
+
+void SourceInitialWeight::prepareCandidate(Candidate *cand) const {
+	double E = cand -> current.getEnergy();
+	double w = norm * pow(E / E0, -alpha);
+	cand -> updateWeight(w);
+}
+
+
 } // namespace crpropa

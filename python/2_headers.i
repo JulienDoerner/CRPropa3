@@ -106,7 +106,9 @@
     npy_intp shape[1];
     shape[0] = 3;
     PyObject *ro;
-    if (sizeof($self->data[0]) == NPY_SIZEOF_FLOAT) {
+    if (sizeof($self->data[0]) == NPY_SIZEOF_INT) {
+      ro = PyArray_SimpleNewFromData(1, shape, NPY_INT, $self->data);
+    } else if (sizeof($self->data[0]) == NPY_SIZEOF_FLOAT) {
       ro = PyArray_SimpleNewFromData(1, shape, NPY_FLOAT, $self->data);
     } else if (sizeof($self->data[0]) == NPY_SIZEOF_DOUBLE) {
       ro = PyArray_SimpleNewFromData(1, shape, NPY_DOUBLE, $self->data);
@@ -136,7 +138,7 @@
 
   const std::string getDescription() {
     char buffer[256];
-    sprintf( buffer, "Vector(%.6G, %.6G, %.6G)", $self->x, $self->y, $self->z );
+    sprintf( buffer, "Vector(%.6G, %.6G, %.6G)", $self->getX(), $self->getY(), $self->getZ() );
     return buffer;
   }
 }
@@ -146,6 +148,7 @@
 
 %template(Vector3d) crpropa::Vector3<double>;
 %template(Vector3f) crpropa::Vector3<float>;
+%template(Vector3i) crpropa::Vector3<int>;
 
 %include "crpropa/Referenced.h"
 %include "crpropa/Units.h"
@@ -356,6 +359,7 @@
 %include "crpropa/magneticField/turbulentField/PlaneWaveTurbulence.h"
 %include "crpropa/module/BreakCondition.h"
 %include "crpropa/module/Boundary.h"
+%include "crpropa/module/dynamic_hist.h"
 
 %feature("director") crpropa::Observer;
 %feature("director") crpropa::ObserverFeature;

@@ -9,6 +9,7 @@
 #include <ctime>
 
 #include <H5Ipublic.h>
+#include <hdf5.h>
 
 namespace crpropa {
 
@@ -52,6 +53,7 @@ DATASET "OUTPUTTYPE" {
  */
 class HDF5Output: public Output {
 
+public:
 	typedef struct OutputRow {
 		double D;
 		double z;
@@ -96,7 +98,6 @@ class HDF5Output: public Output {
 	time_t lastFlush;
 	unsigned int flushLimit;
 	unsigned int candidatesSinceFlush;
-public:
 	/** Default constructor.
 	  	Does not run from scratch.
 	    At least open() has to be called in addition.

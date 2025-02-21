@@ -31,6 +31,7 @@
 #include "crpropa/module/CandidateSplitting.h"
 #include "crpropa/module/ContinuesLoss.h"
 #include "crpropa/module/DiffusionSDE.h"
+#include "crpropa/module/dynamic_hist.h"
 #include "crpropa/module/EMDoublePairProduction.h"
 #include "crpropa/module/EMInverseComptonScattering.h"
 #include "crpropa/module/EMPairProduction.h"
