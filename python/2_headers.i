@@ -359,7 +359,7 @@
 %include "crpropa/magneticField/turbulentField/PlaneWaveTurbulence.h"
 %include "crpropa/module/BreakCondition.h"
 %include "crpropa/module/Boundary.h"
-%include "crpropa/module/dynamic_hist.h"
+// %include "crpropa/module/dynamic_hist.h"
 
 %feature("director") crpropa::Observer;
 %feature("director") crpropa::ObserverFeature;
