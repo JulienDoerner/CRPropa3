@@ -286,6 +286,23 @@ public:
 	std::string getDescription() const;
 };
 
+/**
+ @class 
+*/
+class AdvectionFromPlane: public AdvectionField {
+  private: 
+	Vector3d origin; //< origin of the plane 
+	Vector3d normal; //< normal vector of the plane
+	double velocity; //< advection velocity 
+
+  public: 
+	/* constructor */
+	AdvectionFromPlane(double v, const Vector3d origin = Vector3d(0.), const Vector3d normal = Vector3d(0., 0., 1.));
+
+	Vector3d getField(const Vector3d &position) const;
+	double getDivergence(const Vector3d &position) const;
+};
+
 } // namespace crpropa
 
 #endif // CRPROPA_ADVECTIONFIELD_H
