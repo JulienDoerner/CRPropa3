@@ -389,6 +389,7 @@ add_library(crpropa SHARED
   src/module/SynchrotronRadiation.cpp
   src/module/TextOutput.cpp
   src/module/Tools.cpp
+  src/module/WeightedHistogram.cpp
   src/magneticField/ArchimedeanSpiralField.cpp
   src/magneticField/JF12Field.cpp
   src/magneticField/JF12FieldSolenoidal.cpp

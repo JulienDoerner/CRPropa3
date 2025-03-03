@@ -419,6 +419,7 @@
 %include "crpropa/module/AdiabaticCooling.h"
 %include "crpropa/module/MomentumDiffusion.h"
 %include "crpropa/module/CandidateSplitting.h"
+%include "crpropa/module/WeightedHistogram.h"
 
 %template(IntSet) std::set<int>;
 %include "crpropa/module/Tools.h"
