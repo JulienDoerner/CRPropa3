@@ -997,7 +997,18 @@ class SourceInitialWeight: public SourceFeature {
 
   public:
 	SourceInitialWeight(double norm = 1, double alpha = 1, double E0 = 1 * GeV);
-	void prepareCandidate(Candidate *candidate) const;
+	void prepareCandidate(Candidate& candidate) const;
+
+	std::string getDescription() const;
+};
+
+class SourceWeightFactor: public SourceFeature {
+  private: 
+	double w;
+
+  public:
+	SourceWeightFactor(double w);
+	void prepareCandidate(Candidate& candidate) const;
 };
 
 

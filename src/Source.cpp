@@ -1224,10 +1224,24 @@ void SourceAddProperty::prepareCandidate(Candidate& cand) const {
 
 SourceInitialWeight::SourceInitialWeight(double norm, double alpha, double E0) : norm(norm), alpha(alpha), E0(E0) { }
 
-void SourceInitialWeight::prepareCandidate(Candidate *cand) const {
-	double E = cand -> current.getEnergy();
+void SourceInitialWeight::prepareCandidate(Candidate& cand) const {
+	double E = cand.current.getEnergy();
 	double w = norm * pow(E / E0, -alpha);
-	cand -> updateWeight(w);
+	cand.updateWeight(w);
+}
+
+std::string SourceInitialWeight::getDescription() const {
+	std::stringstream ss;
+	ss << "SourceInitialWeight: w = " << norm << " * (E / " << E0 << ")^" << -alpha << "\n";
+	return ss.str();
+}
+
+// ----------------------------------------------------------------------------
+
+SourceWeightFactor::SourceWeightFactor(double factor) : w(factor) { }
+
+void SourceWeightFactor::prepareCandidate(Candidate& cand) const {
+	cand.updateWeight(w);
 }
 
 
