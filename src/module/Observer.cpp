@@ -348,5 +348,32 @@ std::string ObserverSurface::getDescription() const {
 	return ss.str();
 }
 
+// ObserverInwardVeto -------------------------------------------------------
+ObserverInwardVeto::ObserverInwardVeto(Vector3d center, bool inward) :
+		center(center), inward(inward) { }
+
+DetectionState ObserverInwardVeto::checkDetection(Candidate *candidate) const {
+	Vector3d pos = candidate->current.getPosition();
+	Vector3d dir = candidate->current.getDirection();
+	double d = (pos - center).dot(dir);
+
+	if (inward) {
+		if (d < 0)
+			return VETO;
+	} else {
+		if (d > 0)
+			return VETO;
+	}
+
+	return NOTHING;
+}
+
+std::string ObserverInwardVeto::getDescription() const {
+	std::stringstream ss;
+	ss << "ObserverInwardVeto: ";
+	ss << "center = " << center / kpc << " kpc, ";
+	ss << "inward = " << (inward ? "yes" : "no");
+	return ss.str();
+}
 
 } // namespace crpropa

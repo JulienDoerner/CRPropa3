@@ -269,6 +269,26 @@ public:
 	std::string getDescription() const;
 };
 
+
+/**
+ @class ObserverInwardVeto
+ @brief Veto for particles that are moving inward
+ */
+class ObserverInwardVeto: public ObserverFeature {
+  private: 
+	Vector3d center; //< central point of the sphere
+	bool inward; //< if true inward direction is vetoed
+
+  public:
+	/** Constructor
+	 @param center		center of the sphere
+	 @param inward		if true, veto particles moving inward
+	 */
+	ObserverInwardVeto(Vector3d center, bool inward = true);
+	DetectionState checkDetection(Candidate *candidate) const;
+	std::string getDescription() const;
+};
+
 /** @} */
 
 }
