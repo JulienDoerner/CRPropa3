@@ -429,6 +429,7 @@
 %include "crpropa/module/AdiabaticCooling.h"
 %include "crpropa/module/MomentumDiffusion.h"
 %include "crpropa/module/CandidateSplitting.h"
+%include "crpropa/module/ColumnDensity.h"
 %include "crpropa/module/ContinuesLoss.h"
 %include "crpropa/module/WeightedHistogram.h"
 

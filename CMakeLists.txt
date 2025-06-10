@@ -365,6 +365,7 @@ add_library(crpropa SHARED
   src/module/Boundary.cpp
   src/module/BreakCondition.cpp
   src/module/CandidateSplitting.cpp
+  src/module/ColumnDensity.cpp
   src/module/ContinuesLoss.cpp
   src/module/DiffusionSDE.cpp
   # src/module/dynamic_hist.cpp
