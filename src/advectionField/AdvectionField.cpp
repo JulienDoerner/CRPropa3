@@ -534,17 +534,43 @@ std::string SphericalAdvectionShock::getDescription() const {
 //----------------------------------------------------------------
 
 AdvectionFromPlane::AdvectionFromPlane(double v, const Vector3d o, const Vector3d n) : AdvectionField(), velocity(v), origin(o) {
-	normal = normal.getUnitVector();
+	this -> normal = n.getUnitVector();
 }
 
 Vector3d AdvectionFromPlane::getField(const Vector3d &position) const {
 	Vector3d r = position - origin;
-	double d = r.dot(normal);
-	return velocity * normal * d / fabs(d);
+	if (r.dot(normal) > 0)
+		return velocity * normal;
+	else 
+		return -velocity * normal;
 }
 
 double AdvectionFromPlane::getDivergence(const Vector3d &position) const {
 	return 0.;
+}
+
+void AdvectionFromPlane::setOrigin(const Vector3d o) {
+	origin = o;
+}
+
+void AdvectionFromPlane::setNormal(const Vector3d n) {
+	normal = n.getUnitVector();
+}
+
+void AdvectionFromPlane::setVelocity(double v) {
+	velocity = v;
+}
+
+Vector3d AdvectionFromPlane::getOrigin() const {
+	return origin;
+}
+
+Vector3d AdvectionFromPlane::getNormal() const {
+	return normal;
+}
+
+double AdvectionFromPlane::getVelocity() const {
+	return velocity;
 }
 
 } // namespace crpropa

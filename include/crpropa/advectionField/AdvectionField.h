@@ -301,6 +301,15 @@ class AdvectionFromPlane: public AdvectionField {
 
 	Vector3d getField(const Vector3d &position) const;
 	double getDivergence(const Vector3d &position) const;
+
+	// set and get function 
+	void setOrigin(const Vector3d o);
+	void setNormal(const Vector3d n);
+	void setVelocity(double v);
+
+	Vector3d getOrigin() const;
+	Vector3d getNormal() const;
+	double getVelocity() const;
 };
 
 } // namespace crpropa
