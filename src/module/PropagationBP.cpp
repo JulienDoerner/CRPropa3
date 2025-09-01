@@ -6,23 +6,23 @@
 
 namespace crpropa {
 	void PropagationBP::tryStep(const Y &y, Y &out, Y &error, double h,
-			ParticleState &particle, double z, double q, double m) const {
-		out = dY(y.x, y.u, h, z, q, m);  // 1 step with h
+			ParticleState &particle, double z, double q, double m, double time) const {
+		out = dY(y.x, y.u, h, z, q, m, time);  // 1 step with h
 
-		Y outHelp = dY(y.x, y.u, h/2, z, q, m);  // 2 steps with h/2
-		Y outCompare = dY(outHelp.x, outHelp.u, h/2, z, q, m);
+		Y outHelp = dY(y.x, y.u, h/2, z, q, m, time);  // 2 steps with h/2
+		Y outCompare = dY(outHelp.x, outHelp.u, h/2, z, q, m, time);
 
 		error = errorEstimation(out.x , outCompare.x , h);
 	}
 
 
 	PropagationBP::Y PropagationBP::dY(Vector3d pos, Vector3d dir, double step,
-			double z, double q, double m) const {
+			double z, double q, double m, double time) const {
 		// half leap frog step in the position
 		pos += dir * step / 2.;
 
 		// get B field at particle position
-		Vector3d B = getFieldAtPosition(pos, z);
+		Vector3d B = getFieldAtPosition(pos, z, time);
 
 		// Boris help vectors
 		Vector3d t = B * q / 2 / m * step / c_light;
@@ -69,6 +69,7 @@ namespace crpropa {
 		// calculate charge of particle
 		double q = current.getCharge();
 		double step = maxStep;
+		double time = candidate->getTime();
 
 		// rectilinear propagation for neutral particles
 		if (q == 0) {
@@ -87,7 +88,7 @@ namespace crpropa {
 		// if minStep is the same as maxStep the adaptive algorithm with its error
 		// estimation is not needed and the computation time can be saved:
 		if (minStep == maxStep){
-			yOut = dY(yIn.x, yIn.u, step, z, q, m);
+			yOut = dY(yIn.x, yIn.u, step, z, q, m, time);
 		} else {
 			step = clip(candidate->getNextStep(), minStep, maxStep);
 			newStep = step;
@@ -95,7 +96,7 @@ namespace crpropa {
 
 			// try performing step until the target error (tolerance) or the minimum/maximum step size has been reached
 			while (true) {
-				tryStep(yIn, yOut, yErr, step, current, z, q, m);
+				tryStep(yIn, yOut, yErr, step, current, z, q, m, time);
 				r = yErr.u.getR() / tolerance;  // ratio of absolute direction error and tolerance
 				if (r > 1) {  // large direction error relative to tolerance, try to decrease step size
 					if (step == minStep)  // already minimum step size
@@ -134,13 +135,13 @@ namespace crpropa {
 	}
 
 
-	Vector3d PropagationBP::getFieldAtPosition(Vector3d pos, double z) const {
+	Vector3d PropagationBP::getFieldAtPosition(Vector3d pos, double z, double time) const {
 		Vector3d B(0, 0, 0);
 		try {
 			// check if field is valid and use the field vector at the
 			// position pos with the redshift z
 			if (field.valid())
-				B = field->getField(pos, z);
+				B = field->getField(pos, z, time);
 		} catch (std::exception &e) {
 			KISS_LOG_ERROR 	<< "PropagationBP: Exception in PropagationBP::getFieldAtPosition.\n"
 					<< e.what();
