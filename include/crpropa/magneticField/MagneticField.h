@@ -29,6 +29,14 @@ public:
 	virtual Vector3d getField(const Vector3d &position, double z) const {
 		return getField(position);
 	};
+
+	virtual Vector3d getField(const Vector3d &position, double z, double t) const {
+		return getField(position, z);
+	};
+
+	std::string getDescription() const {
+		return "MagneticField";
+	};
 };
 
 /**

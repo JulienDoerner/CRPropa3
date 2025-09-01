@@ -75,10 +75,7 @@ class testCrossLanguagePolymorphism(unittest.TestCase):
                 crp.MagneticField.__init__(self)
                 self.val = val
                 
-            def getField(self, position):
-                return crp.Vector3d(self.val)
-
-            def getField(self, position, z):
+            def getField(self, position, z = 0, time = 0):
                 return crp.Vector3d(self.val)
 
         field = CustomMagneticField(crp.gauss)
