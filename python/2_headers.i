@@ -350,6 +350,7 @@
 %include "crpropa/magneticField/KST24Field.h"
 %include "crpropa/magneticField/ArchimedeanSpiralField.h"
 %include "crpropa/magneticField/CMZField.h"
+%include "crpropa/magneticField/timedependentField/MagneticFieldTimeDecay.h"
 %include "crpropa/magneticField/turbulentField/TurbulentField.h"
 %include "crpropa/magneticField/turbulentField/GridTurbulence.h"
 %include "crpropa/magneticField/turbulentField/SimpleGridTurbulence.h"

@@ -396,6 +396,7 @@ add_library(crpropa SHARED
   src/magneticField/MagneticFieldGrid.cpp
   src/magneticField/PolarizedSingleModeMagneticField.cpp
   src/magneticField/PT11Field.cpp
+  src/magneticField/timedependentField/MagneticFieldTimeDecay.cpp
   src/magneticField/turbulentField/GridTurbulence.cpp
   src/magneticField/turbulentField/HelicalGridTurbulence.cpp
   src/magneticField/turbulentField/PlaneWaveTurbulence.cpp

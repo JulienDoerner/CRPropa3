@@ -67,6 +67,7 @@
 #include "crpropa/magneticField/UF23Field.h"
 #include "crpropa/magneticField/KST24Field.h"
 #include "crpropa/magneticField/CMZField.h"
+#include "crpropa/magneticField/timedependentField/MagneticFieldTimeDecay.h"
 #include "crpropa/magneticField/turbulentField/GridTurbulence.h"
 #include "crpropa/magneticField/turbulentField/HelicalGridTurbulence.h"
 #include "crpropa/magneticField/turbulentField/PlaneWaveTurbulence.h"
