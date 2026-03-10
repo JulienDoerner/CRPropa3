@@ -143,6 +143,7 @@
   }
 }
 
+
 %feature("python:slot", "tp_str", functype="reprfunc") crpropa::Vector3::getDescription();
 %feature("python:slot", "tp_repr", functype="reprfunc") crpropa::Vector3::getDescription();
 
@@ -345,6 +346,7 @@
 %implicitconv crpropa::ref_ptr<crpropa::CylindricalProjectionMap>;
 %template(CylindricalProjectionMapRefPtr) crpropa::ref_ptr<crpropa::CylindricalProjectionMap>;
 
+%include "crpropa/advectionField/TimeDependentAdvectionField.h"
 %include "crpropa/magneticField/MagneticFieldGrid.h"
 %include "crpropa/magneticField/GalacticMagneticField.h"
 %feature("notabstract") QuimbyMagneticFieldAdapter;
@@ -355,6 +357,7 @@
 %include "crpropa/magneticField/PT11Field.h"
 %include "crpropa/magneticField/TF17Field.h"
 %include "crpropa/magneticField/UF23Field.h"
+%include "crpropa/magneticField/KST24Field.h"
 %include "crpropa/magneticField/ArchimedeanSpiralField.h"
 %include "crpropa/magneticField/CMZField.h"
 %include "crpropa/magneticField/turbulentField/TurbulentField.h"

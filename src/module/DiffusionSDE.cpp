@@ -57,6 +57,8 @@ void DiffusionSDE::process(Candidate *candidate) const {
 	Vector3d PosIn = current.getPosition();
 	Vector3d DirIn = current.getDirection();
 
+    double time = candidate->getTime();
+
     // rectilinear propagation for neutral particles
     // If an advection field is provided the drift is also included
 	if (current.getCharge() == 0) {
@@ -65,7 +67,7 @@ void DiffusionSDE::process(Candidate *candidate) const {
 
 		Vector3d LinProp(0.);
 		if (advectionField){
-			driftStep(Pos, LinProp, h);
+			driftStep(Pos, LinProp, h, time);
 		}
 
 		current.setPosition(Pos + LinProp + dir*h*c_light);
@@ -76,7 +78,6 @@ void DiffusionSDE::process(Candidate *candidate) const {
 
 	double z = candidate->getRedshift();
 	double rig = current.getEnergy() / current.getCharge();
-
 
     // Calculate the Diffusion tensor
 	double BTensor[] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
@@ -152,7 +153,7 @@ void DiffusionSDE::process(Candidate *candidate) const {
 		Vector3d Pos = current.getPosition();
 		Vector3d LinProp(0.);
 		if (advectionField){
-			driftStep(Pos, LinProp, h);
+			driftStep(Pos, LinProp, h, time);
 			current.setPosition(Pos + LinProp);
 	 		candidate->setCurrentStep(h*c_light);
 	  		double newStep = 5*h*c_light;
@@ -182,7 +183,7 @@ void DiffusionSDE::process(Candidate *candidate) const {
     // Calculate the advection step
 	Vector3d LinProp(0.);
 	if (advectionField){
-		driftStep(PosIn, LinProp, h);
+		driftStep(PosIn, LinProp, h, time);
 	}
 
     // Integration of the SDE with a Mayorama-Euler-method
@@ -268,8 +269,8 @@ void DiffusionSDE::tryStep(const Vector3d &PosIn, Vector3d &POut, Vector3d &PosE
 	}
 }
 
-void DiffusionSDE::driftStep(const Vector3d &pos, Vector3d &linProp, double h) const {
-	Vector3d advField = getAdvectionFieldAtPosition(pos);
+void DiffusionSDE::driftStep(const Vector3d &pos, Vector3d &linProp, double h, double t) const {
+	Vector3d advField = getAdvectionFieldAtPosition(pos, t);
 	linProp += advField * h;
 	return;
 }
@@ -387,13 +388,13 @@ ref_ptr<AdvectionField> DiffusionSDE::getAdvectionField() const {
 	return advectionField;
 }
 
-Vector3d DiffusionSDE::getAdvectionFieldAtPosition(Vector3d pos) const {
+Vector3d DiffusionSDE::getAdvectionFieldAtPosition(Vector3d pos, double t) const {
 	Vector3d AdvField(0.);
 	try {
 		// check if field is valid and use the field vector at the
 		// position pos
 		if (advectionField.valid())
-			AdvField = advectionField->getField(pos);
+			AdvField = advectionField->getField(pos, t);
 	}
 	catch (std::exception &e) {
 		KISS_LOG_ERROR 	<< "DiffusionSDE: Exception in DiffusionSDE::getAdvectionFieldAtPosition.\n"

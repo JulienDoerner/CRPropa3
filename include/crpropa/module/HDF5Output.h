@@ -56,6 +56,7 @@ class HDF5Output: public Output {
 public:
 	typedef struct OutputRow {
 		double D;
+		double time;
 		double z;
 		uint64_t SN;
 		int32_t ID;
