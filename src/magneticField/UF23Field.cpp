@@ -255,6 +255,32 @@ UF23Field::UF23Field(const ModelType mt) :
     fToroidalZ     =  5.4564991e+00 * uf23::kpc;
     break;
   }
+  case asymT: {
+    fDiskPitch    =  12.1 * uf23::degree;
+    fDiskH        =  0.6 * uf23::kpc;
+    fDiskW        =  0.001;
+    fDiskB1       =  1.57 * uf23::microgauss;
+    fDiskB2       =  1.5 * uf23::microgauss;
+    fDiskB3       =  3.5 * uf23::microgauss;
+    fDiskPhase1   =  180 * uf23::degree;
+    fDiskPhase2   =  156 * uf23::degree;
+    fDiskPhase3   =  69 * uf23::degree;
+    
+    fToroidalBN   =  2.28 * uf23::microgauss;
+    fToroidalBS   = -2.08 * uf23::microgauss;
+    fToroidalZ    =  3.6 * uf23::kpc;
+    fToroidalRN   =  9.0 * uf23::kpc;
+    fToroidalRS   =  15.0 * uf23::kpc;
+    fToroidalW    =  0.14;
+
+    fPoloidalB    =  0.94 * uf23::microgauss;
+    fPoloidalP    =  1.77 * uf23::kpc;
+    fPoloidalZ    =  3.34 * uf23::kpc;
+    fPoloidalR    =  7.45 * uf23::kpc;
+    fPoloidalW    =  0.17 * uf23::kpc;
+    fPoloidalXi   =  0.41 * uf23::degree;
+    break;
+  }
   default: {
     throw std::runtime_error("unknown field model");
     break;
@@ -367,7 +393,13 @@ UF23Field::getToroidalHaloField(const double x, const double y, const double z)
   const double absZ = std::abs(z);
 
   const double b0 = z >= 0 ? fToroidalBN : fToroidalBS;
-  const double rh = fToroidalR;
+  double rh;
+  if (fModelType == asymT) {
+    rh = z >= 0 ? fToroidalRN : fToroidalRS;
+    
+  } else {
+    rh = fToroidalR;
+  }
   const double z0 = fToroidalZ;
   const double fwh = fToroidalW;
   const double sigmoidR = uf23::Sigmoid(r, rh, fwh);

@@ -35,7 +35,8 @@ public:
     cre10,
     synCG,
     twistX,
-    nebCor
+    nebCor,
+    asymT
   };
 
 
@@ -85,6 +86,8 @@ private:
     eToroidalBN,
     eToroidalBS,
     eToroidalR,
+    eToroidalRN,
+    eToroidalRS,
     eToroidalW,
     eToroidalZ,
     eTwistingTime,
@@ -122,6 +125,8 @@ private:
   double& fToroidalBN   = fParameters[eToroidalBN];
   double& fToroidalBS   = fParameters[eToroidalBS];
   double& fToroidalR    = fParameters[eToroidalR];
+  double& fToroidalRN   = fParameters[eToroidalRN];
+  double& fToroidalRS   = fParameters[eToroidalRS];
   double& fToroidalW    = fParameters[eToroidalW];
   double& fToroidalZ    = fParameters[eToroidalZ];
   double& fTwistingTime = fParameters[eTwistingTime];
